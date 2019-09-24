@@ -12,7 +12,7 @@ You feed it a filename (full path), and it'll do a few things:
   - it'll tell you where each one is (e.g. "6-0 column 3")
   - type of resonances = "strong": >90 degrees, "possible": > 60 degrees
   - it'll make plots of strong resonances
-    - (and save those in the `resonances` directory, created when script is run)
+    (and save those in the `resonances` directory, created when script is run)
   
 
 
@@ -29,6 +29,7 @@ First, run `resonance_finder.py`. There are a couple ways to do this:
 - run the file like `python resonance_finder.py -f <filename>`
 
 - open the file and change the line where you set `filepath`, then run it
+  (make sure the line at the bottom that calls `find_resonances()` isn't commented)
 
 Either way, a file called `resonance_info.csv` will be created in `resonances`.
 
