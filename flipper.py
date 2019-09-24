@@ -1,29 +1,37 @@
 import numpy as np
 from os.path import split, exists, splitext
+import argparse
+
+filepath = "/Users/callum/Desktop/rough_python/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
 
 def is_float(string):
+    """checks if a string can be cast as a float"""
     try:
         _ = float(string)
         return True
     except ValueError:
         return False
 
-def swap_if_needed(last_nums, nums):
-    # compare every float in line to every one in last_line, column-wise.
-    # swap if needed
-    new_nums = nums
+def flip_if_needed(last_nums, nums):
+    """Compare every number in nums to every one in last_nums.
+    If the difference is big, flip the number in nums until we make it small.
+
+    By "flip", I mean add or subtract 180, as needed.
+
+    Return the new list of nums, after being flipped if needed
+    """
     for i in range(len(last_nums)):  # there might be more new nums than old
         num = nums[i]
         last_num = last_nums[i]
     
         if abs(last_num - num) >= 50:
             num = num + np.sign(last_num - num) * 180
-        
-        new_nums[i] = num
-    return new_nums
+        # 
+        nums[i] = num
+    return nums
 
 def sanitize(filename):
-    # returns file as list of numbers
+    """returns file as list of lists of numbers"""
     with open(filename, "r+") as read_file:
         lines = read_file.readlines()
     text_lines = []
@@ -38,7 +46,9 @@ def sanitize(filename):
     return text_lines, list_of_nums
 
 def separate_into_sections(list_of_nums):
-    # list_of_nums is a file converted into lists of numbers rather than strings
+    """returns sections of the file based on line length"""
+    # list_of_nums is a list of lists of numbers, 
+    # from the file but not strings anymore
     sections = []
     section = []
     last_length = 0  # since we can't assume every file starts with 2 cols
@@ -61,19 +71,14 @@ def separate_into_sections(list_of_nums):
 
     return sections
 
-def separate_into_channels(filename):
-    # return channels with labels
-    text_lines, num_lines = sanitize(filename)
-    sections = separate_into_sections(num_lines)
-
-    titles = []
-    for line in text_lines:
-        if "&" not in line:  # all that's left is titles
-            titles.append(line)
+def separate_into_megasections(sections):
+    """maybe calling them megasections was a little dramatic,
+    but megasections are the sections of the input file separated by titles,
+    rather than sections, which are separated by changing line length
+    """
 
     # make mega_sections (combine sections of increasing size)
     mega_sections = []
-    
     while len(sections) > 1: 
         top_section = sections[-2]
         bottom_section = sections[-1]
@@ -92,7 +97,23 @@ def separate_into_channels(filename):
     else:
         raise ValueError("How did this happen?")
     
-    mega_sections = list(reversed(mega_sections))  # now it's top-to-bottom
+    return list(reversed(mega_sections))  # now it's top-to-bottom
+
+def separate_into_channels(filename):
+    """returns channels (as lists of floats) with associated labels (strings)
+    
+    Also returns energies associated with each row. Note that not all
+    channels have the same length as the energy list
+    """
+    text_lines, num_lines = sanitize(filename)
+    sections = separate_into_sections(num_lines)
+
+    titles = []
+    for line in text_lines:
+        if "&" not in line:  # all that's left is titles
+            titles.append(line)
+
+    mega_sections = separate_into_megasections(sections)
 
     # initialize channels dict
     channels = {}
@@ -115,14 +136,14 @@ def separate_into_channels(filename):
                 channels[channel_titles[i]].append(num)
 
     # now make list to contain energy values
-    #energy = [line[0] for line in mega_sections[0]]
+    energies = [line[0] for line in mega_sections[0]]
     
-
-    return channels
+    return channels, energies
 
 def index_list(input_list):
-    # returns indices for smallest to largest values in input_list,
-    # no repeat values allowed
+    """returns indices for smallest to largest values in input_list,
+    no repeat values allowed"""
+    
     sorted_index_list = []
     s_input_list = sorted(input_list)
     used = [False for element in input_list]
@@ -141,17 +162,19 @@ def index_list(input_list):
     return sorted_index_list
 
 def do_one_flip(section):
+    """perform the flip operation on one section one time"""
     new_section = section
     compare_line = section[0]  # we'll always compare to the line before
     for i, line in enumerate(section):
         if i == 0:  # never adjust the first line
             continue
         # now just check for +- swaps that need to happen
-        new_section[i] = swap_if_needed(compare_line, line)
+        new_section[i] = flip_if_needed(compare_line, line)
         compare_line = new_section[i]
     return new_section
 
 def flip_one_section(section):
+    """perform flip operation on a section until fully finished"""
     # sections have the same number of columns all the way through
     new_section = []
     while new_section != section:
@@ -159,6 +182,7 @@ def flip_one_section(section):
     return new_section
 
 def write_data(sections, text_lines, filename):
+    """write the outcome of a flip back into a file"""
     write_filename = filename+'_flipped'
     text_line_counter = 0
     tlc = text_line_counter
@@ -181,24 +205,42 @@ def write_data(sections, text_lines, filename):
                 top_line = top_section[-1]
                 bottom_line = bottom_section[0]
                 if len(top_line) > len(bottom_line):
-                    # next title
+                    # next title and "&"
                     write_file.write(text_lines[tlc])
                     tlc += 1
                     write_file.write(text_lines[tlc])
                     tlc += 1
-        # end with a &
+        # end with a "&"
         write_file.write(text_lines[tlc])
         tlc += 1
     return write_filename
 
 def dist(a, b):
-    # compares a and b "up to flips", does not correspond to physical distance
+    """compares a and b "up to flips", i.e. mod 180"""
     a_mod = a % 180
     b_mod = b % 180
     d = abs(a_mod - b_mod)
     return d
 
 def get_column_map(top_line, bottom_line):
+    """
+    get a dict of the form 
+    
+    map ={
+        0: a_index0,
+        0: a_index1,
+    }
+    
+    so if you're wondering what column in a corresponds to which one in b,
+    you can use this mapping.
+
+    To apply a column mapping easily, use apply_col_mapping()
+
+    but the ideas is that you just say you just say
+    
+    b = [b[map[i]] for i in range(len(b))]
+    and then b has the same column order as a.
+    """
     # so they're easier to type
     a = top_line
     b = bottom_line
@@ -210,14 +252,14 @@ def get_column_map(top_line, bottom_line):
     # this will be the mapping from "b ordering" to "a ordering"
     mapping = {n: n for n in range(len(b))}
     used_in_mapping = [False for _ in range(len(b))]
+    used_in_mapping[0] = True  # ignore zeroth column -- energies
 
     for i, a_i in enumerate(a):
         # skip 0th column (energies are fixed in place)
         if i == 0:
             continue
-        # note: the 0th column is fixed (energies), so we say dist is huge
-        # and stuff after a is new, so it won't be rearranged
-        distances = [1000000] + [dist(a_i, b_j) for b_j in b[1:len(a)]]
+        # say distance to zeroth column is huge so we never pick energies
+        distances = [1000000] + [dist(a_i, b_j) for b_j in b[1:]]
         # indices will be sorted smallest to largest
         # and must contain all numbers up to len(a)
         # I wanted to just use distanced.index(x) for x in sorted(distances)
@@ -242,7 +284,8 @@ def get_column_map(top_line, bottom_line):
             outputs.append(output)
     return mapping
 
-def apply_mapping(line, mapping):
+def apply_col_mapping(line, mapping):
+    """applies a mapping to line, mapping defined in get_column_map()"""
     rearranged = []
     for i in range(len(line)):
         value = line[mapping[i]]
@@ -250,7 +293,10 @@ def apply_mapping(line, mapping):
     return rearranged
 
 def get_add_map(top_line, bottom_line):
-    # add map is for when we're combining previously flipped sections    
+    """add_map is for when we're combining previously flipped sections
+    and we need to know what to add to other sections so that the boundaries
+    of flipped sections don't have discontinuities
+    """    
     # variables to make writing this easier
     a = top_line
     b = bottom_line
@@ -271,10 +317,14 @@ def get_add_map(top_line, bottom_line):
     return add_map
 
 def apply_add_mapping(line, mapping):
+    """apply map generated in get_add_map()"""
     new_line = [line[i] + mapping[i] for i in range(len(line))]
     return new_line
 
 def flip_columns(sections):
+    """take a list of sections and return those same sections, but with
+    the columns re-ordered so they're consistent throughout megasections.
+    """
     big_flipped_sections = []
     while len(sections) > 1:   
         # get the bottom section and next lowest one
@@ -305,7 +355,7 @@ def flip_columns(sections):
             # then map the bottom section so it matches top section's order
             new_bottom_section = top_section
             for line in bottom_section:
-                new_bottom_section.append(apply_mapping(line, mapping))
+                new_bottom_section.append(apply_col_mapping(line, mapping))
 
             # the new lowest section is the combination of bottom and 2nd-lowest
             # but now they have the same order
@@ -329,6 +379,8 @@ def flip_columns(sections):
     return separate_into_sections(list_of_lines)
 
 def flip_all_sections(sections):
+    """perform flipping operation on each section and make sure that there
+    are no discontinuities at section breaks within megasections"""
     # flip each section individially
     sections = [flip_one_section(section) for section in sections]
     
@@ -371,8 +423,44 @@ def flip_all_sections(sections):
     list_of_lines = sections[0]
     return separate_into_sections(list_of_lines)
 
+def start_from_zero(sections):
+    # get megasections
+    mega_sections = separate_into_megasections(sections)
+    
+    for ms in mega_sections:
+        num_cols = max(len(line) for line in ms)
+        
+        # find first element in each column
+        first_elements = [None for _ in range(num_cols)]
+        for line in ms:
+            for i in range(num_cols):
+                if (first_elements[i] is None) and (i < len(line)):
+                    first_elements[i] = line[i]
+            if all(x is not None for x in first_elements):
+                break
+        # now subtract that from every other member
+        for i in range(len(ms)):
+            line = ms[i]
+            for j in range(len(line)):
+                if j == 0:  # don't mess with the energies!
+                    continue
+                line[j] = line[j] - first_elements[j]
+            ms[i] = line
+    
+    # now stitch all the megasections back into a list of lists of numbers
+    list_of_lines = []
+    for ms in mega_sections:
+        for line in ms:
+            list_of_lines.append(line)
+
+    # and return in section format
+    return separate_into_sections(list_of_lines)
+
+
+
 def flip(read_filename):
-    print("🖕 flipping 🖕 your 🖕 data 🖕")    
+    """flipping operation from start to finish"""
+    print("flipping your data")    
     
     # read from original file
     text_lines, number_lines = sanitize(read_filename)
@@ -381,13 +469,20 @@ def flip(read_filename):
     sections = separate_into_sections(number_lines)
     sections = flip_columns(sections)
     sections = flip_all_sections(sections)
-    
+    sections = start_from_zero(sections)
     # write to another file
     new_filename = write_data(sections, text_lines, read_filename)
 
-    print("🖕 your 🖕 data 🖕 has 🖕 been 🖕 flipped 🖕")
+    print("your data has been flipped")
     return new_filename
 
 if __name__ == "__main__":
-    flip("/Users/callum/Desktop/rough_python/ncsmc/to_be_flipped/big_eigenphase_shift.agr")
+    parser = argparse.ArgumentParser("Flipper")
+    parser.add_argument(
+        "-f", nargs='?', const=None, help="full path to file", type=str)
+    args = parser.parse_args()
+    if args.f is not None:
+        flip(args.f)
+    else:
+        flip(filepath)
 
