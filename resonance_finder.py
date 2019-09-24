@@ -193,5 +193,5 @@ if __name__ == "__main__":
     if args.f is not None:
         find_resonances(args.f)
     else:
-        find_resonances(filename)
+        #find_resonances(filename)
         multi_channel_plot(filename, already_flipped=True, energy_bounds=(0,5))
