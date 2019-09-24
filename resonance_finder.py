@@ -10,7 +10,6 @@ images_dir = join(this_dir, "resonances")
 if not exists(images_dir):
     mkdir(images_dir)
 
-
 def multi_strip(string, list_of_strs):
     for s in list_of_strs:
         if s == "":  # ignore this case
