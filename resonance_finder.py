@@ -123,7 +123,7 @@ def find_resonances(filename):
 
     print("found resonances, made plots, made resonance_info.txt file")
 
-def multi_channel_plot(filename, already_flipped=False, energy_bounds=(-inf, inf)):
+def multi_channel_plot(filename, already_flipped=False, energy_bounds=(-inf, inf), output_type="matplotlib"):
     """makes one plot with all user-specified channels"""
     # note: we get channels_to_plot from further up in the file
     lines = channels_to_plot.split("\n")
@@ -150,34 +150,36 @@ def multi_channel_plot(filename, already_flipped=False, energy_bounds=(-inf, inf
     # energies is a list of energy values, possibly longer than some channels
     channels, energies = separate_into_channels(new_filename)
 
-    # set up plot
-    plt.title("Multi-Channel Plot")
-    plt.ylabel("Phase (degrees)")
-    plt.xlabel("Energy")
-
     l_bound, r_bound = energy_bounds
 
-    # now look in each channel, plot the ones we care about
-    for title, phases in channels.items():
-        # see if the title matches one we were given. If so, plot
-        nice_title = make_nice_title(title)
-        if nice_title in input_titles:
-            print("adding", nice_title, "to plot")
-            # energies may be longer than phases,
-            # so we add zeros to the start if needed
-            len_diff = len(energies) - len(phases)
-            phases = [0 for _ in range(len_diff)] + phases
-            plot_energies = []
-            plot_phases = []
-            for i, e in enumerate(energies):
-                if l_bound <= e and e <= r_bound:
-                    plot_energies.append(e)
-                    plot_phases.append(phases[i])
-            plt.plot(plot_energies, plot_phases, label=nice_title)
+    if output_type == "matplotlib":
+        # set up plot
+        plt.title("Multi-Channel Plot")
+        plt.ylabel("Phase (degrees)")
+        plt.xlabel("Energy")
+        # now look in each channel, plot the ones we care about
+        for title, phases in channels.items():
+            # see if the title matches one we were given. If so, plot
+            nice_title = make_nice_title(title)
+            if nice_title in input_titles:
+                print("adding", nice_title, "to plot")
+                # energies may be longer than phases,
+                # so we add zeros to the start if needed
+                len_diff = len(energies) - len(phases)
+                phases = [0 for _ in range(len_diff)] + phases
+                plot_energies = []
+                plot_phases = []
+                for i, e in enumerate(energies):
+                    if l_bound <= e and e <= r_bound:
+                        plot_energies.append(e)
+                        plot_phases.append(phases[i])
+                plt.plot(plot_energies, plot_phases, label=nice_title)
 
-    plt.legend(loc='upper right', shadow=False, fontsize='xx-small')
-    plt.savefig(join(output_dir, "multi_channel_plot.png"))
-    plt.clf()
+        plt.legend(loc='upper right', shadow=False, fontsize='xx-small')
+        plt.savefig(join(output_dir, "multi_channel_plot.png"))
+        plt.clf()
+    else:
+        raise ValueError("output type "+str(output_type)+" not supported yet!")
     print("plot saved")
     
     
@@ -191,5 +193,5 @@ if __name__ == "__main__":
     if args.f is not None:
         find_resonances(args.f)
     else:
+        find_resonances(filename)
         multi_channel_plot(filename, already_flipped=True, energy_bounds=(0,5))
-        #find_resonances(filename)
