@@ -173,7 +173,7 @@ def multi_channel_plot(filename, already_flipped=False, energy_bounds=(-inf, inf
                     if l_bound <= e and e <= r_bound:
                         plot_energies.append(e)
                         plot_phases.append(phases[i])
-                # save channel to a file too
+                # save channel to a file too, so we can use it later
                 with open(join(output_dir, nice_title+".csv"), "w+") as cfile:
                     for e, p in zip(plot_energies, plot_phases):
                         cfile.write(",".join([str(e), str(p)]) + "\n")
