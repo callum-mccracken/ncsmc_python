@@ -14,5 +14,5 @@ lib64
 **/ncsd_output_files*
 **/resonances*
 **/to_be_flipped*
-
-.DS_Store
+**.json
+**.DS_Store
