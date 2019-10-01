@@ -173,6 +173,10 @@ def multi_channel_plot(filename, already_flipped=False, energy_bounds=(-inf, inf
                     if l_bound <= e and e <= r_bound:
                         plot_energies.append(e)
                         plot_phases.append(phases[i])
+                # save channel to a file too
+                with open(join(output_dir, nice_title+".csv"), "w+") as cfile:
+                    for e, p in zip(plot_energies, plot_phases):
+                        cfile.write(",".join([str(e), str(p)]) + "\n")
                 plt.plot(plot_energies, plot_phases, label=nice_title)
 
         plt.legend(loc='upper right', shadow=False, fontsize='xx-small')
@@ -180,8 +184,9 @@ def multi_channel_plot(filename, already_flipped=False, energy_bounds=(-inf, inf
         plt.clf()
     else:
         raise ValueError("output type "+str(output_type)+" not supported yet!")
-    print("plot saved")
     
+    print("done plotting")
+
     
 
 
@@ -194,4 +199,4 @@ if __name__ == "__main__":
         find_resonances(args.f)
     else:
         #find_resonances(filename)
-        multi_channel_plot(filename, already_flipped=True, energy_bounds=(0,5))
+        multi_channel_plot(filename, already_flipped=True)
