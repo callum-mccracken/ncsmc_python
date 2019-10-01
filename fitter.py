@@ -3,9 +3,9 @@ import numpy as np
 from os.path import join
 import matplotlib.pyplot as plt
 
-from resonance_finder import output_dir
+from utils import output_dir
 
-def read_csv(filename = join(output_dir, "2_-_0_column_2.csv")):
+def read_csv(filename):
     with open(filename, 'r') as f:
         reader = csv.reader(f)
         data_list = np.array(list(reader), dtype=float)
@@ -16,7 +16,6 @@ def read_csv(filename = join(output_dir, "2_-_0_column_2.csv")):
         raise ValueError("This function was only made for reading two columns!")
     x, y = data_list[:]
     return x, y
-
 
 def monotonic_sections(x,y):
     sections = []
@@ -43,10 +42,9 @@ def monotonic_sections(x,y):
     sections.append([monotonic_x, monotonic_y])
     return np.array(sections)
 
-def useful_sections(mono_sections):
-    # mono_sections = monotonic sections, we're guaranteed monotonicity
+def useful_sections(monotonic_sections):
     sections = []
-    for section in mono_sections:
+    for section in monotonic_sections:
         x, y = section
         # we'll ignore sections with less than 10 points
         if len(x) < 10:
@@ -66,8 +64,6 @@ def flip_x_y(sections):
         x, y = section
         sections[i] = [y, x]
     return np.array(sections)
-
-
 
 def fit_cubic(x, y):
     z = np.polyfit(x, y, 3)
@@ -124,8 +120,7 @@ def best_fit(x, y):
     
     return best_fit_func
 
-
 if __name__ == "__main__":
     # get data from csv file
-    x, y = read_csv()
+    x, y = read_csv(join(output_dir, "CSVs", "2_-_0_column_2.csv"))
     best_fit(x, y)

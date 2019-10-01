@@ -15,19 +15,12 @@ Contains a whole bunch of functions which...
 """
 
 import numpy as np
-from os.path import split, exists, splitext
+from os.path import split
 import argparse
 
+from utils import is_float, index_list
+
 filepath = "/Users/callum/Desktop/rough_python/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
-
-def is_float(string):
-    """checks if a string can be cast as a float"""
-    try:
-        _ = float(string)
-        return True
-    except ValueError:
-        return False
-
 
 def flip_if_needed(last_nums, nums):
     """Compare every number in nums to every one in last_nums.
@@ -43,7 +36,6 @@ def flip_if_needed(last_nums, nums):
     
         if abs(last_num - num) >= 50:
             num = num + np.sign(last_num - num) * 180
-        # 
         nums[i] = num
     return nums
 
@@ -160,30 +152,6 @@ def separate_into_channels(filename):
     energies = [line[0] for line in mega_sections[0]]
     
     return channels, energies
-
-
-def index_list(input_list):
-    """returns indices for smallest to largest values in input_list,
-    no repeat values allowed.
-    
-    Same idea as list.index() but that gives repeats"""
-    
-    sorted_index_list = []
-    s_input_list = sorted(input_list)
-    used = [False for element in input_list]
-    for element in s_input_list:
-        index = input_list.index(element)
-        # if we've already counted this one, take the next
-        while used[index]:
-            new_list = input_list[index+1:]
-            index = len(input_list)-len(new_list) + new_list.index(element)
-        sorted_index_list.append(index)
-        used[index] = True
-
-    # double-check we don't have any repeats
-    assert all([i in sorted_index_list for i in range(len(input_list))])
-
-    return sorted_index_list
 
 
 def do_one_flip(section):
