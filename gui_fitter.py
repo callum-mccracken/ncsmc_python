@@ -82,5 +82,5 @@ def make_plot(x, y):
 
 if __name__ == "__main__":
     # get data from csv file
-    x, y = read_csv()
+    x, y = read_csv(join(output_dir, "CSVs", "2_-_0_column_2.csv"))
     make_plot(x, y)
