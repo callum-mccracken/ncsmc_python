@@ -1,3 +1,19 @@
+"""
+Contains a whole bunch of functions which...
+
+- read ncsmc output files
+
+- clean them up for processing
+
+- remove unphysical jumps in the data caused by "wrapping"
+  (e.g. -89.8, -89.9, 89.9)
+
+- reorder columns so that they are consistent as one scrolls down
+
+- allow you to pick out individual channels
+
+"""
+
 import numpy as np
 from os.path import split, exists, splitext
 import argparse
@@ -11,6 +27,7 @@ def is_float(string):
         return True
     except ValueError:
         return False
+
 
 def flip_if_needed(last_nums, nums):
     """Compare every number in nums to every one in last_nums.
@@ -30,6 +47,7 @@ def flip_if_needed(last_nums, nums):
         nums[i] = num
     return nums
 
+
 def sanitize(filename):
     """returns file as list of lists of numbers"""
     with open(filename, "r+") as read_file:
@@ -44,6 +62,7 @@ def sanitize(filename):
             nums = [float(n) for n in nums]
             list_of_nums.append(nums)
     return text_lines, list_of_nums
+
 
 def separate_into_sections(list_of_nums):
     """returns sections of the file based on line length"""
@@ -70,6 +89,7 @@ def separate_into_sections(list_of_nums):
             raise ValueError("Why does section have lines of different length?")
 
     return sections
+
 
 def separate_into_megasections(sections):
     """maybe calling them megasections was a little dramatic,
@@ -98,6 +118,7 @@ def separate_into_megasections(sections):
         raise ValueError("How did this happen?")
     
     return list(reversed(mega_sections))  # now it's top-to-bottom
+
 
 def separate_into_channels(filename):
     """returns channels (as lists of floats) with associated labels (strings)
@@ -140,9 +161,12 @@ def separate_into_channels(filename):
     
     return channels, energies
 
+
 def index_list(input_list):
     """returns indices for smallest to largest values in input_list,
-    no repeat values allowed"""
+    no repeat values allowed.
+    
+    Same idea as list.index() but that gives repeats"""
     
     sorted_index_list = []
     s_input_list = sorted(input_list)
@@ -161,6 +185,7 @@ def index_list(input_list):
 
     return sorted_index_list
 
+
 def do_one_flip(section):
     """perform the flip operation on one section one time"""
     new_section = section
@@ -173,6 +198,7 @@ def do_one_flip(section):
         compare_line = new_section[i]
     return new_section
 
+
 def flip_one_section(section):
     """perform flip operation on a section until fully finished"""
     # sections have the same number of columns all the way through
@@ -181,8 +207,10 @@ def flip_one_section(section):
         new_section = do_one_flip(section)
     return new_section
 
+
 def write_data(sections, text_lines, filename):
-    """write the outcome of a flip back into a file"""
+    """write flipped data back into a file,
+    making sure to put the text lines (i.e. titles) back in the right spots"""
     write_filename = filename+'_flipped'
     text_line_counter = 0
     tlc = text_line_counter
@@ -215,6 +243,7 @@ def write_data(sections, text_lines, filename):
         tlc += 1
     return write_filename
 
+
 def dist(a, b):
     """compares a and b "up to flips", i.e. mod 180"""
     a_mod = a % 180
@@ -222,26 +251,29 @@ def dist(a, b):
     d = abs(a_mod - b_mod)
     return d
 
+
 def get_column_map(top_line, bottom_line):
     """
     get a dict of the form 
     
     map ={
-        0: a_index0,
-        0: a_index1,
+        0: index0,
+        1: index1,
+        ...
     }
     
-    so if you're wondering what column in a corresponds to which one in b,
-    you can use this mapping.
+    so if you're wondering what column in the top line corresponds
+    to which one in the bottom line, you can use this mapping.
 
     To apply a column mapping easily, use apply_col_mapping()
 
     but the ideas is that you just say you just say
     
     b = [b[map[i]] for i in range(len(b))]
+    
     and then b has the same column order as a.
     """
-    # so they're easier to type
+    # abbreviate so they're easier to type
     a = top_line
     b = bottom_line
 
@@ -284,6 +316,7 @@ def get_column_map(top_line, bottom_line):
             outputs.append(output)
     return mapping
 
+
 def apply_col_mapping(line, mapping):
     """applies a mapping to line, mapping defined in get_column_map()"""
     rearranged = []
@@ -291,6 +324,7 @@ def apply_col_mapping(line, mapping):
         value = line[mapping[i]]
         rearranged.append(value)
     return rearranged
+
 
 def get_add_map(top_line, bottom_line):
     """add_map is for when we're combining previously flipped sections
@@ -316,10 +350,12 @@ def get_add_map(top_line, bottom_line):
         add_map[i] = add_amount
     return add_map
 
+
 def apply_add_mapping(line, mapping):
-    """apply map generated in get_add_map()"""
+    """apply map generated in get_add_map() to a line"""
     new_line = [line[i] + mapping[i] for i in range(len(line))]
     return new_line
+
 
 def flip_columns(sections):
     """take a list of sections and return those same sections, but with
@@ -378,6 +414,7 @@ def flip_columns(sections):
             list_of_lines.append(line)
     return separate_into_sections(list_of_lines)
 
+
 def flip_all_sections(sections):
     """perform flipping operation on each section and make sure that there
     are no discontinuities at section breaks within megasections"""
@@ -423,7 +460,10 @@ def flip_all_sections(sections):
     list_of_lines = sections[0]
     return separate_into_sections(list_of_lines)
 
+
 def start_from_zero(sections):
+    """ensure that all channels start at zero"""
+    
     # get megasections
     mega_sections = separate_into_megasections(sections)
     
@@ -457,9 +497,8 @@ def start_from_zero(sections):
     return separate_into_sections(list_of_lines)
 
 
-
 def flip(read_filename):
-    """flipping operation from start to finish"""
+    """performs flipping operation from start to finish"""
     print("flipping your data")    
     
     # read from original file
@@ -470,11 +509,13 @@ def flip(read_filename):
     sections = flip_columns(sections)
     sections = flip_all_sections(sections)
     sections = start_from_zero(sections)
+    
     # write to another file
     new_filename = write_data(sections, text_lines, read_filename)
 
     print("your data has been flipped")
     return new_filename
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Flipper")
