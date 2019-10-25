@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from os.path import join, exists
 from os import mkdir
 
-filename = "/Users/callum/Desktop/rough_python/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
+filename = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
 flipped = True
 
 def find_resonances(filename, already_flipped=False):

@@ -20,7 +20,7 @@ import argparse
 
 from utils import is_float, index_list
 
-filepath = "/Users/callum/Desktop/rough_python/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
+filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
 
 def flip_if_needed(last_nums, nums):
     """Compare every number in nums to every one in last_nums.

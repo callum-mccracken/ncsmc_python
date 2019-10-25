@@ -10,7 +10,7 @@ from utils import output_dir, make_nice_title
 from flipper import separate_into_channels, flip
 
 # file details
-filename = "/Users/callum/Desktop/rough_python/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
+filename = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
 flipped = True
 
 # format: 2J, parity, 2T, column_number, resonance_type
@@ -56,6 +56,7 @@ def plot_single_channel(energies, phases, title):
         mkdir(join(output_dir, "PNGs"))
     plt.savefig(join(output_dir, "PNGs", title+".png"))
     plt.clf()
+    plt.close()
 
 def multi_channel_plot(filename, already_flipped, energy_bounds, output_type="matplotlib", channels=channels_to_plot):
     """makes one plot with all user-specified channels"""
@@ -118,6 +119,7 @@ def multi_channel_plot(filename, already_flipped, energy_bounds, output_type="ma
         plt.legend(loc='upper right', shadow=False, fontsize='xx-small')
         plt.savefig(join(output_dir, "multi_channel_plot.png"))
         plt.clf()
+        plt.close()
     else:
         raise ValueError("output type "+str(output_type)+" not supported yet!")
     
