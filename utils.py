@@ -7,6 +7,15 @@ output_dir = os.path.join(os.getcwd(), "resonances")
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
 
+def abs_path(path):
+    """return the absolute path to a file"""
+    # first get rid of any ../ or ./ items
+    path = os.path.realpath(path)
+    # then expand ~ for the user
+    path = os.path.expanduser(path)
+    # TODO: anything else we should do? Like deal with environment variables?
+    return path
+
 def is_float(string):
     """checks if a string can be cast as a float"""
     try:
@@ -72,3 +81,22 @@ def make_nice_title(xmtitle):
     t2 = nice_title[parity_index+1:]
     nice_title = "_".join([j2, parity, t2])
     return nice_title
+
+def xmgrace_title(xmtitle, series_num):
+    """Takes an xmgrace series title and edits the series number,
+    setting it equal to series_num."""
+
+    # xmtitle has the general format "@ s[num] [...]"
+    # and we want it to end up looking like "@ s[series_num] [...]"
+
+    # break up into "words", separated by spaces
+    words = xmtitle.split()
+
+    # the 1th word should be "s[num]". Set it to "s[series_num]" instead.
+    words[1] = "s" + str(series_num)
+
+    # rejoin the words
+    new_title = " ".join(words)
+
+    # ta-da!
+    return new_title

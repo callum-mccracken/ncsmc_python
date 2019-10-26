@@ -13,12 +13,11 @@ Contains a whole bunch of functions which...
 - allow you to pick out individual channels
 
 """
-
-import numpy as np
-from os.path import split
 import argparse
 
-from utils import is_float, index_list
+import numpy as np
+
+import utils
 
 filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
 
@@ -59,7 +58,7 @@ def sanitize(filename):
         for i, num in enumerate(nums):
             if num == "NaN":
                 nums[i] = 0
-        if not all(is_float(num) for num in nums):
+        if not all(utils.is_float(num) for num in nums):
             # save these for title purposes
             text_lines.append(line)
         else:
@@ -277,7 +276,7 @@ def get_column_map(top_line, bottom_line):
         # and must contain all numbers up to len(a)
         # I wanted to just use distanced.index(x) for x in sorted(distances)
         # but that only gives the first index
-        indices = index_list(distances[:len(a)])
+        indices = utils.index_list(distances[:len(a)])
         # now take the index with the minimum distance that has not been used
         min_index = 0
         while used_in_mapping[indices[min_index]]:
@@ -481,7 +480,7 @@ def start_from_zero(sections):
 def flip(read_filename):
     """performs flipping operation from start to finish"""
     print("Flipping...\r", end="")
-    
+    read_filename = utils.abs_path(read_filename)
     # read from original file
     text_lines, number_lines = sanitize(read_filename)
     
@@ -494,8 +493,7 @@ def flip(read_filename):
     # write to another file
     new_filename = write_data(sections, text_lines, read_filename)
 
-    print("Your data has been flipped!")
-    print("Output:", new_filename)
+    print("Your data has been flipped! Output:", new_filename)
     return new_filename
 
 

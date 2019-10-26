@@ -4,7 +4,7 @@ from os.path import join
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, RadioButtons, TextBox
 
-from resonance_finder import output_dir
+from utils import output_dir
 
 from fitter import read_csv, fit_cubic, r_squared
 
