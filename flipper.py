@@ -41,19 +41,32 @@ def flip_if_needed(last_nums, nums):
 
 
 def sanitize(filename):
-    """returns file as list of lists of numbers"""
+    """
+    Opens NCSMC output file, reads each line, separates into text lines and
+    number lines. Sets NaN values to zero.
+    
+    Returns lists:
+    - one for title lines, contains strings
+    - one for number lines, each entry is a sub-list of floats
+    """
     with open(filename, "r+") as read_file:
         lines = read_file.readlines()
     text_lines = []
-    list_of_nums = []
+    number_lines = []
     for line in lines:
         nums = line.split()
+        # replace all NaNs with zero
+        for i, num in enumerate(nums):
+            if num == "NaN":
+                nums[i] = 0
         if not all(is_float(num) for num in nums):
+            # save these for title purposes
             text_lines.append(line)
         else:
+            # save numbers for analysis later
             nums = [float(n) for n in nums]
-            list_of_nums.append(nums)
-    return text_lines, list_of_nums
+            number_lines.append(nums)
+    return text_lines, number_lines
 
 
 def separate_into_sections(list_of_nums):
@@ -467,7 +480,7 @@ def start_from_zero(sections):
 
 def flip(read_filename):
     """performs flipping operation from start to finish"""
-    print("flipping your data")    
+    print("Flipping...\r", end="")
     
     # read from original file
     text_lines, number_lines = sanitize(read_filename)
@@ -481,7 +494,8 @@ def flip(read_filename):
     # write to another file
     new_filename = write_data(sections, text_lines, read_filename)
 
-    print("your data has been flipped")
+    print("Your data has been flipped!")
+    print("Output:", new_filename)
     return new_filename
 
 
