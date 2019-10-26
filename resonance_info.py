@@ -45,7 +45,7 @@ def get_resonance_info(filename, already_flipped=False):
             # anything we should do here?
             pass
 
-    # write resonance info to a file
+    # write resonance info to a file, (res = resonance)
     res_file_name = join(utils.output_dir, "resonance_info.csv")
     with open(res_file_name, "w+") as res_file:
         res_file.write("2J,parity,2T,column_number,resonance_type\n")
@@ -53,7 +53,7 @@ def get_resonance_info(filename, already_flipped=False):
             Jx2, parity, Tx2, _, column_number = title.split("_")
             write_list = [Jx2, parity, Tx2, column_number, res_type]
             res_file.write(",".join(write_list) + "\n")
-    print("Found all resonances, saved CSV to", res_file_name)
+    print("Analyzed all channels, saved CSV with info to", res_file_name)
     return res_file_name
 
 if __name__ == "__main__":

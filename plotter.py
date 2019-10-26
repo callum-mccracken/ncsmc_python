@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 import utils
 import flipper
-from resonance_info import find_resonances
+from resonance_info import get_resonance_info
 
 # File path (relative paths are okay)
 filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
@@ -37,9 +37,9 @@ output_types = ["matplotlib", "xmgrace"]  # what kind of output(s) do you want?
 
 # types of resonances to plot. Possible values: "strong", "possible", "none"
 res_types = ["strong"]
+#res_types = ["strong", "possible", "none"]  # if you want to plot everything
 
-def plot(filename, flipped=False, e_bounds=(-inf, inf),
-         res_types=["strong", "possible"],
+def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
          output_types=["matplotlib", "xmgrace"], channels=""):
     """
     Makes a whole bunch of plots.
@@ -57,7 +57,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf),
     # if no channels are provided, get them all
     if not any([utils.is_float(char) for char in channels_to_plot]):
         # get csv filename with resonance info
-        res_output_file = find_resonances(filename, already_flipped=True)
+        res_output_file = get_resonance_info(filename, already_flipped=True)
         # take all channels, i.e. all text in the file
         with open(res_output_file, "r+") as channel_file:
             channels = channel_file.read()

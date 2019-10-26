@@ -28,11 +28,6 @@ def make_plot(x, y, title):
     left_slider = Slider(left_bound_box, 'Low (L/R keys)', min(x), max(x), valinit=min(x))
     right_slider = Slider(right_bound_box, 'High (U/D keys)', min(x), max(x), valinit=max(x))
 
-    # set up on-screen text
-    r2_ax = plt.axes([0.8, 0.5, 0.2, 0.1])
-    text_box = TextBox(r2_ax, 'Label: ', "$R^2$")
-
-
     # create reset button
     resetax = plt.axes([0.8, 0.025, 0.1, 0.04])
     reset_button = Button(resetax, 'Reset', color=colour, hovercolor='0.975')
@@ -42,9 +37,11 @@ def make_plot(x, y, title):
     fit_y = np.linspace(min(y), max(y), num=1000)
     fit_x = [fit(yi) for yi in fit_y]
     
-    # calculate R^2 value for new fit
-    r2 = r_squared(x, [fit(yi) for yi in y])
-    #text_box.set_val(str(r2))
+    # calculate R^2 value for new fit, stick it in a text box
+    r2 = r_squared(x, np.array([fit(yi) for yi in y]))
+    # set up on-screen text
+    r2_ax = plt.axes([0.7, 0.3, 0.15, 0.05])
+    text_box = TextBox(r2_ax, '$R^2 =$', initial="{:5f}".format(r2))
 
     # plot data and fit
     data_line, = ax.plot(x, y, 'b-', marker=".", mfc="k")
@@ -69,7 +66,7 @@ def make_plot(x, y, title):
         # make new fit with that data
         new_fit = fit_function(bounded_y, bounded_x)
         bounded_fit_y = np.linspace(min(bounded_y), max(bounded_y), num=1000)
-        bounded_fit_x = [new_fit(yi) for yi in bounded_fit_y]
+        bounded_fit_x = np.array([new_fit(yi) for yi in bounded_fit_y])
 
         fit_line.set_ydata(bounded_fit_y)
         fit_line.set_xdata(bounded_fit_x)
@@ -78,8 +75,8 @@ def make_plot(x, y, title):
         ax.set_ylim(min(bounded_y), max(bounded_y)*1.1)
 
         # calculate R^2 value for new fit, adjust text box
-        r2 = r_squared(bounded_x, [fit(yi) for yi in bounded_y])
-        text_box.set_val(str(r2))
+        r2 = r_squared(bounded_x, np.array([fit(yi) for yi in bounded_y]))
+        text_box.set_val("{:5f}".format(r2))
 
 
         fig.canvas.draw_idle()
@@ -113,6 +110,6 @@ def make_plot(x, y, title):
 
 if __name__ == "__main__":
     # get data from csv file
-    resonance_title = "2_-_0_column_2.csv"
+    resonance_title = "2_-_2_column_2.csv"
     x, y = read_csv(join(output_dir, "CSVs", resonance_title))
     make_plot(x, y, resonance_title)

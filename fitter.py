@@ -8,13 +8,13 @@ from utils import output_dir
 def read_csv(filename):
     with open(filename, 'r') as f:
         reader = csv.reader(f)
-        data_list = np.array(list(reader), dtype=float)
+        data = np.array(list(reader), dtype=float)
     # data_list is structured like [[line, one], [line, two]]
     # we want the transpose, [[col, one], [col, two]]
-    data_list = data_list.T
-    if len(data_list) != 2:
+    data = data.T
+    if len(data) != 2:
         raise ValueError("This function was only made for reading two columns!")
-    x, y = data_list[:]
+    x, y = data[:]
     return x, y
 
 def monotonic_sections(x,y):
@@ -80,13 +80,12 @@ def plot_fit(x, y, fit_func):
     plt.show()
 
 def r_squared(y, y_fit):
-    # Thanks, StackExchange!
-    # residual sum of squares
-    ss_res = np.sum((y - y_fit) ** 2)
-    # total sum of squares
-    ss_tot = np.sum((y - np.mean(y)) ** 2)
-    # r-squared
-    r2 = 1 - (ss_res / ss_tot)
+    mean = np.mean(y)
+    # ss = sum of squares
+    ss_real = np.sum((y - mean) ** 2)
+    ss_fit = np.sum((y_fit - mean) ** 2)
+    # r-squared is defined as this
+    r2 = 1 - (ss_fit / ss_real)
     return r2
 
 def best_fit(x, y):
@@ -122,5 +121,5 @@ def best_fit(x, y):
 
 if __name__ == "__main__":
     # get data from csv file
-    x, y = read_csv(join(output_dir, "CSVs", "2_-_0_column_2.csv"))
+    x, y = read_csv(join(output_dir, "CSVs", "0_-_0_column_2.csv"))
     best_fit(x, y)
