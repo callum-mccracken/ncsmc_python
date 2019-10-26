@@ -5,14 +5,16 @@ from plotter import plot_single_channel
 from utils import make_nice_title, output_dir
 
 import matplotlib.pyplot as plt
-from os.path import join, exists
+from os.path import join, exists, realpath
 from os import mkdir
+import argparse
 
 filename = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
 flipped = True
 
 def find_resonances(filename, already_flipped=False):
     """Takes a ncsmc filename and detects / plots all resonances"""
+    filename = realpath(filename)
     # first flip the file if needed
     if already_flipped:
         new_filename = filename
@@ -60,4 +62,11 @@ def find_resonances(filename, already_flipped=False):
     return res_file_name
 
 if __name__ == "__main__":
-    find_resonances(filename, already_flipped=flipped)
+    parser = argparse.ArgumentParser("Flipper")
+    parser.add_argument(
+        "-f", nargs='?', const=None, help="full path to file", type=str)
+    args = parser.parse_args()
+    if args.f is not None:
+        find_resonances(args.f)
+    else:
+        find_resonances(filename, already_flipped=flipped)
