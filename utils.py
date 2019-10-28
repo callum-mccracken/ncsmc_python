@@ -49,9 +49,9 @@ def index_list(input_list):
 
 def multi_strip(string, list_of_strs):
     """
-        Returns the string but stripped of substrings
-        
-        Same idea as string.strip(), but for many arguments
+    Returns the string but stripped of substrings
+    
+    Same idea as string.strip(), but for many arguments
     """
     for s in list_of_strs:
         if s == "":  # ignore this case

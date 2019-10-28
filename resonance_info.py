@@ -1,4 +1,12 @@
-"""contains function which finds resonances in ncsmc data"""
+"""
+Contains function which looks through ncsmc data and figures out which channels
+have a resonance, which ones have a potential resonance, and which ones have no
+resonance. Writes data to a csv file.
+
+Can be run with
+
+python resonance_info.py -f /path/to/some/file (assumes file is not flipped)
+"""
 from os.path import join
 import argparse
 

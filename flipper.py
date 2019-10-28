@@ -12,6 +12,9 @@ Contains a whole bunch of functions which...
 
 - allow you to pick out individual channels
 
+This module can be run with
+
+python flipper.py -f /path/to/some/file (assumes file is not flipped)
 """
 import argparse
 
@@ -23,7 +26,7 @@ filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flippe
 
 def flip_if_needed(last_nums, nums):
     """Compare every number in nums to every one in last_nums.
-    If the difference is big, flip the number in nums until we make it small.
+    If the difference is big, flip the number to make it small.
 
     By "flip", I mean add or subtract 180, as needed.
 
@@ -69,7 +72,29 @@ def sanitize(filename):
 
 
 def separate_into_sections(list_of_nums):
-    """returns sections of the file based on line length"""
+    """returns sections of the file based on line length
+    
+    e.g. if your file looks like
+    [
+        [1, 2],
+        [1, 2], 
+        [1, 2, 3, 4],
+        [1, 2, 3, 4]
+    ]
+
+    then this will return
+
+    [
+        [
+            [1, 2],
+            [1, 2]
+        ]
+        [
+            [1, 2, 3, 4],
+            [1, 2, 3, 4]
+        ]
+    ]
+    """
     # list_of_nums is a list of lists of numbers, 
     # from the file but not strings anymore
     sections = []
@@ -99,6 +124,33 @@ def separate_into_megasections(sections):
     """maybe calling them megasections was a little dramatic,
     but megasections are the sections of the input file separated by titles,
     rather than sections, which are separated by changing line length
+
+    e.g. the input looks like:
+    [
+        [
+            [1, 2],
+            [1, 2]
+        ],
+        [
+            [1, 3, 4, 6]
+        ],
+        # there must have been a title here since the next line is smaller
+        [
+            [1, 2]
+        ]
+    ]
+    --> the megasections are:
+
+    [
+        [
+            [1, 2],
+            [1, 2],
+            [1, 3, 4, 6]
+        ],
+        [
+            [1, 2]
+        ]
+    ]
     """
 
     # make mega_sections (combine sections of increasing size)
@@ -125,10 +177,12 @@ def separate_into_megasections(sections):
 
 
 def separate_into_channels(filename):
-    """returns channels (as lists of floats) with associated labels (strings)
+    """
+    Returns channels (i.e. individual columns within megasections)
+    as lists of floats, along with their associated labels (strings).
     
     Also returns energies associated with each row. Note that not all
-    channels have the same length as the energy list
+    channels have the same length as the energy list!
     """
     text_lines, num_lines = sanitize(filename)
     sections = separate_into_sections(num_lines)
@@ -248,7 +302,10 @@ def get_column_map(top_line, bottom_line):
     To apply a column mapping easily, use apply_col_mapping()
 
     but the ideas is that you just say you just say
-    
+
+    a = top line
+    b = bottom line
+    map = get_column_map(a, b)
     b = [b[map[i]] for i in range(len(b))]
     
     and then b has the same column order as a.
@@ -298,7 +355,9 @@ def get_column_map(top_line, bottom_line):
 
 
 def apply_col_mapping(line, mapping):
-    """applies a mapping to line, mapping defined in get_column_map()"""
+    """
+    Applies a column mapping to a line, mapping defined in get_column_map()
+    """
     rearranged = []
     for i in range(len(line)):
         value = line[mapping[i]]
@@ -307,26 +366,27 @@ def apply_col_mapping(line, mapping):
 
 
 def get_add_map(top_line, bottom_line):
-    """add_map is for when we're combining previously flipped sections
+    """
+    An add_map is for when we're combining previously flipped sections
     and we need to know what to add to other sections so that the boundaries
-    of flipped sections don't have discontinuities
+    of flipped sections don't have big jumps due to fixing flipping issues.
+
+    Same kind of idea as get_column_map()
     """    
-    # variables to make writing this easier
-    a = top_line
-    b = bottom_line
-    # what to add to each column of b to get it to match up with a "up to flips"
-    add_map = {n: 0 for n in range(len(b))}  # start by assuming zero
-    for i, a_i in enumerate(a):
-        b_i = b[i]
-        dist = b_i - a_i    
-        # the difference between a and b should be no larger than 50, for sure
-        while abs(dist) > 50:
-            if dist > 0:  # b > a so reduce b
-                b_i -= 180
-            else:  # b < a so increase b
-                b_i += 180
-            dist = b_i - a_i
-        add_amount = b_i - b[i]
+    # what to add to each column of bottom_line
+    # to get it to match up with top_line "up to flips"
+    add_map = {n: 0 for n in range(len(bottom_line))}  # start by assuming zero
+    for i, top_i in enumerate(top_line):
+        bottom_i = bottom_line[i]
+        diff = bottom_i - top_i
+        # the absolute difference should be no larger than 50, for sure
+        while abs(diff) > 50:
+            if diff > 0:  # bottom > top so reduce bottom
+                bottom_i -= 180
+            else:  # bottom < top so increase bottom
+                bottom_i += 180
+            diff = bottom_i - top_i
+        add_amount = bottom_i - bottom_line[i]
         add_map[i] = add_amount
     return add_map
 
@@ -338,7 +398,8 @@ def apply_add_mapping(line, mapping):
 
 
 def flip_columns(sections):
-    """take a list of sections and return those same sections, but with
+    """
+    Take a list of sections and return those same sections, but with
     the columns re-ordered so they're consistent throughout megasections.
     """
     big_flipped_sections = []
@@ -396,8 +457,10 @@ def flip_columns(sections):
 
 
 def flip_all_sections(sections):
-    """perform flipping operation on each section and make sure that there
-    are no discontinuities at section breaks within megasections"""
+    """
+    Perform flipping operation on each section and make sure that there
+    are no discontinuities at section breaks within megasections
+    """
     # flip each section individially
     sections = [flip_one_section(section) for section in sections]
     
@@ -442,7 +505,7 @@ def flip_all_sections(sections):
 
 
 def start_from_zero(sections):
-    """ensure that all channels start at zero"""
+    """Ensure that all channels start at zero"""
     
     # get megasections
     mega_sections = separate_into_megasections(sections)
@@ -478,7 +541,7 @@ def start_from_zero(sections):
 
 
 def flip(read_filename):
-    """performs flipping operation from start to finish"""
+    """Performs flipping operation from start to finish"""
     print("Flipping...\r", end="")
     read_filename = utils.abs_path(read_filename)
     # read from original file
@@ -498,6 +561,7 @@ def flip(read_filename):
 
 
 if __name__ == "__main__":
+    # all this stuff is here so you can run this with the -f flag
     parser = argparse.ArgumentParser("Flipper")
     parser.add_argument(
         "-f", nargs='?', const=None, help="full path to file", type=str)
@@ -505,5 +569,6 @@ if __name__ == "__main__":
     if args.f is not None:
         flip(args.f)
     else:
+        # if no -f flag is provided, do this.
         flip(filepath)
 

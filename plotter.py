@@ -1,4 +1,13 @@
-"""functions for making plots related to ncsmc output"""
+"""
+Contains a function for making plots related to ncsmc output.
+
+"matplotlib" (saves as png), and "xmgrace" output types are currently supported,
+makes both by default.
+
+Can be run with
+
+python plotter.py -f /path/to/some/file (assumes file is not flipped)
+"""
 from os.path import join, exists
 import os
 from math import inf
@@ -11,10 +20,10 @@ import flipper
 from resonance_info import get_resonance_info
 
 # File path (relative paths are okay)
-filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
+filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
 
 # Has the file already been "flipped"?
-flipped = False
+flipped = True
 
 # Which channels should be added to the multi channel plot?
 # format: 2J, parity, 2T, column_number, resonance_type
