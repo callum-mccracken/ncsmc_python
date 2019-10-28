@@ -7,6 +7,12 @@ makes both by default.
 Can be run with
 
 python plotter.py -f /path/to/some/file (assumes file is not flipped)
+
+It will:
+- flip the file (output saved in same directory as original file)
+- detect which channels have resonances (saved in resonances directory)
+- plot all channels with resonances (also saved in "resonances")
+  - you can set it to plot ALL channels if you want, see the variable res_types
 """
 from os.path import join, exists
 import os
@@ -20,10 +26,10 @@ import flipper
 from resonance_info import get_resonance_info
 
 # File path (relative paths are okay)
-filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
+filepath = "~/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
 
 # Has the file already been "flipped"?
-flipped = True
+flipped = False
 
 # Which channels should be added to the multi channel plot?
 # format: 2J, parity, 2T, column_number, resonance_type
