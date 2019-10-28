@@ -9,10 +9,10 @@ if not os.path.exists(output_dir):
 
 def abs_path(path):
     """return the absolute path to a file"""
-    # first get rid of any ../ or ./ items
-    path = os.path.realpath(path)
-    # then expand ~ for the user
+    # first expand ~ for the user
     path = os.path.expanduser(path)
+    # then get rid of any ../ or ./ items
+    path = os.path.realpath(path)
     # TODO: anything else we should do? Like deal with environment variables?
     return path
 

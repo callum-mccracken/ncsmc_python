@@ -1,7 +1,7 @@
 """
 Contains a whole bunch of functions which...
 
-- read ncsmc output files
+- read ncsmc phase shift output files
 
 - clean them up for processing
 

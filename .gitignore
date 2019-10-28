@@ -11,7 +11,7 @@ lib64
 **.pyc
 **.pyo
 **/instructions*
-**/ncsd_output_files*
+**/ncsmc_output*
 **/resonances*
 **/to_be_flipped*
 **.json

@@ -26,7 +26,7 @@ import flipper
 from resonance_info import get_resonance_info
 
 # File path (relative paths are okay)
-filepath = "~/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
+filepath = "~/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/big_eigenphase_shift.agr"
 
 # Has the file already been "flipped"?
 flipped = False

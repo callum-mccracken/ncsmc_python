@@ -9,8 +9,8 @@ You'll likely want to run `plotter.py` most often.
 
 # flipper.py
 
-This script takes your NCSMC output and creates a new file in the same
-directory as the first, with "_flipped" at the end.
+This script takes your NCSMC phase shift output and creates a new file
+in the same directory as the first, with "_flipped" at the end.
 
 - This file has columns rearranged and phases flipped wherever needed
   (when I say flipped I mean "with no large jumps, e.g. from 89 to -89").
