@@ -15,6 +15,8 @@ Contains a whole bunch of functions which...
 This module can be run with
 
 python flipper.py -f /path/to/some/file (assumes file is not flipped)
+
+(output is saved in the same spot as the input, with _flipped at the end)
 """
 import argparse
 
