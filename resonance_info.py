@@ -7,7 +7,8 @@ Can be run with
 
 python resonance_info.py -f /path/to/some/file (assumes file is not flipped)
 """
-from os.path import join
+import os
+from os.path import join, exists
 import argparse
 
 import flipper
@@ -54,6 +55,8 @@ def get_resonance_info(filename, already_flipped=False):
             pass
 
     # write resonance info to a file, (res = resonance)
+    if not exists(utils.output_dir):
+        os.mkdir(utils.output_dir)
     res_file_name = join(utils.output_dir, "resonance_info.csv")
     with open(res_file_name, "w+") as res_file:
         res_file.write("2J,parity,2T,column_number,resonance_type\n")

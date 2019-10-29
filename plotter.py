@@ -103,7 +103,8 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
     # This also means we can add new output types more easily (hopefully).
 
     main_plot_paths = []
-
+    if not exists(utils.output_dir):
+        os.mkdir(utils.output_dir)
     png_dir = join(utils.output_dir, "PNGs")
     csv_dir = join(utils.output_dir, "CSVs")
     grace_dir = join(utils.output_dir, "grace_files")

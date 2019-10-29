@@ -2,10 +2,8 @@
 
 import os
 
-# make directory where we'll store images of resonances etc
+# directory where we'll store info about resonances
 output_dir = os.path.join(os.getcwd(), "resonances")
-if not os.path.exists(output_dir):
-    os.mkdir(output_dir)
 
 def abs_path(path):
     """return the absolute path to a file"""
