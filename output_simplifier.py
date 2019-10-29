@@ -3,7 +3,7 @@
 Output Simplifier
 
 Takes ncsmc output (.out) files, grabs info about bound states,
-and outputs a .out_simplified file in the same spot as the original.
+and outputs a ".out_simplified" file in the same spot as the original.
 
 Can be run by editing the filename parameter in this file,
 or just running the file with the command:
