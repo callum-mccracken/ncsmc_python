@@ -65,9 +65,8 @@ def get_resonance_info(filename, already_flipped=False):
     return res_file_name
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Resonance Finder")
-    parser.add_argument(
-        "-f", nargs='?', const=None, help="full path to file", type=str)
+    parser = argparse.ArgumentParser("Resonance Info")
+    parser.add_argument("-f", nargs='?', const=None, help="filepath", type=str)
     args = parser.parse_args()
     if args.f is not None:
         get_resonance_info(args.f)

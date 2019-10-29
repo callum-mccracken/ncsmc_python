@@ -217,8 +217,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Resonance Plotter")
-    parser.add_argument(
-        "-f", nargs='?', const=None, help="full path to file", type=str)
+    parser.add_argument("-f", nargs='?', const=None, help="filepath", type=str)
     args = parser.parse_args()
     if args.f is not None:
         plot(args.f)

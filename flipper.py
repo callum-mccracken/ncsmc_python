@@ -565,8 +565,7 @@ def flip(read_filename):
 if __name__ == "__main__":
     # all this stuff is here so you can run this with the -f flag
     parser = argparse.ArgumentParser("Flipper")
-    parser.add_argument(
-        "-f", nargs='?', const=None, help="full path to file", type=str)
+    parser.add_argument("-f", nargs='?', const=None, help="filepath", type=str)
     args = parser.parse_args()
     if args.f is not None:
         flip(args.f)
