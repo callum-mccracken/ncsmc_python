@@ -41,7 +41,7 @@ def simplify(filename):
     Makes a simpler version of ncsmc .out files,
     no more scrolling through 100000 line files!
     """
-
+    filename = utils.abs_path(filename)
     print("Simplifying", filename)
     # get all lines from the file, as a list of strings
     with open(filename, "r+") as file_to_simplify:
