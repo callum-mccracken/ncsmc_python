@@ -164,7 +164,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
         print("Working on output type 'xmgrace'...")
         grace_string = ""  # string for the full file
         channel_string = ""  # string for each individual channel
-        series_counter = 1  # for series titles
+        series_counter = 0  # for series titles
         # now look in each channel, plot the ones we care about
         for title, phases in channels.items():
             # see if the title matches one we were given. If so, plot
@@ -195,9 +195,9 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
                 # add this string to the main file
                 grace_string += channel_string
 
-                # before we save this channel, set series number to 1
+                # before we save this channel, set series number to 0
                 lines = channel_string.splitlines()
-                lines[0] = utils.xmgrace_title(lines[0], 1)
+                lines[0] = utils.xmgrace_title(lines[0], 0)
                 channel_string = "\n".join(lines)
 
                 # save channel to the output file
