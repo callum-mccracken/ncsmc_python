@@ -25,19 +25,85 @@ file_format = """Simplified View of {filename}:
 
 (only includes bound states)
 
+Threshold Energy = {thresh_E} MeV
+Groud State Energy = {ground_E} MeV
+
 {states}
 =========================================================================
 """
 
 state_format = """
 =========================================================================
-Energy: {E}
-J: {J}
-T: {T}
-Parity: {parity}
+State Energy = {E} MeV
+J = {J}
+T = {T}
+Parity = {parity}
 
 Details:
 {details}"""
+
+# a bunch of tiny functions for parsing data
+def j_parity_line(line):
+    """
+    checks if line is of the form 
+    
+    2*J=  6    parity=-1
+    """
+    regex = r"[ ]*2\*J=[ ]*[-]?[0-9]*[ ]*parity=[ ]*[-]?[0-9]*\n"
+    return bool(re.match(regex, line))
+def get_j_parity(line):
+    """assuming j_parity_line(line) == True, return J, parity"""
+    # remove everything except necessary info
+    just_nums = line.replace("2*J=", "").replace("parity=", "")
+    # get the two "words", i.e. numbers, separated by spaces
+    Jx2, parity = just_nums.split()
+    J = int(Jx2)/2
+    return J, parity
+def t_line(line):
+    """
+    checks if line is of the form 
+    
+    2*T= 0
+    """ 
+    regex = r"[ ]*2\*T=[ ]*[-]?[0-9]*\n"
+    return bool(re.match(regex, line))
+def get_t(line):
+    """assuming t_line(line) == True, return T"""
+    Tx2 = line.replace("2*T=", "")
+    T = int(Tx2)/2
+    return T
+def bound_state_line(line):
+    """
+    checks if line is of the form 
+    
+    Bound state found at E_b=[energy] [unit]
+    """ 
+    return "Bound state found at E_b=" in line
+def get_e(line):
+    """assuming bound_state_line(line) == True, return E"""
+    # remove the initial bit, as well as extra whitespace
+    with_units = line.replace("Bound state found at E_b=", "").strip()
+    E = with_units.split()[0]  # first "word" = E, second = units
+    return float(E)
+def groud_e_line(line):
+    return "Ground-state E=" in line
+def get_ground_e(line):
+    """line looks like:
+    Ground-state E= -68.4838  T_rel=   9.3033  [...]"""
+    # remove initial bit
+    line = line.replace("Ground-state E=", "")
+    # then after that, it'll be the first "word", strip whitespace too
+    E = line.split()[0].strip()
+    return float(E)
+def thresh_e_line(line):
+    return "Threshold E=" in line
+def get_thresh_e(line):
+    """line looks like:
+     Threshold E= -69.0645 MeV"""
+    # remove the first bit, as well as any extra whitespace
+    with_units = line.replace("Threshold E=", "").strip()
+    E = with_units.split()[0]  # first "word" = E, second = units
+    return float(E)
 
 
 def simplify(filename):
@@ -51,11 +117,16 @@ def simplify(filename):
     with open(filename, "r+") as file_to_simplify:
         lines = file_to_simplify.readlines()
 
+    # if something went wrong, we'll see this where the right value should be
+    default = "ERROR"
+
+    # constant parameters
+    ground_E, thresh_E = default, default
 
     # parameters for each bound state
-    default = "ERROR"  # if something went wrong, we'll see this in the output
     E, J, T, parity, details = default, default, default, default, default
 
+    # this will hold strings describing states
     states = []
 
     """
@@ -69,53 +140,15 @@ def simplify(filename):
     """
     # start by searching for a bound state
     step = "looking for bound state"
-
-    def j_parity_line(line):
-        """
-        checks if line is of the form 
-        
-        2*J=  6    parity=-1
-        """
-        regex = r"[ ]*2\*J=[ ]*[-]?[0-9]*[ ]*parity=[ ]*[-]?[0-9]*\n"
-        return bool(re.match(regex, line))
-    def get_j_parity(line):
-        """assuming j_parity_line(line) == True, return J, parity"""
-        # remove everything except necessary info
-        just_nums = line.replace("2*J=", "").replace("parity=", "")
-        # get the two "words", i.e. numbers, separated by spaces
-        Jx2, parity = just_nums.split()
-        J = int(Jx2)/2
-        return J, parity
-    def t_line(line):
-        """
-        checks if line is of the form 
-        
-        2*T= 0
-        """ 
-        regex = r"[ ]*2\*T=[ ]*[-]?[0-9]*\n"
-        return bool(re.match(regex, line))
-    def get_t(line):
-        """assuming t_line(line) == True, return T"""
-        Tx2 = line.replace("2*T=", "")
-        T = int(Tx2)/2
-        return T
-    def bound_state_line(line):
-        """
-        checks if line is of the form 
-        
-        Bound state found at E_b=[energy] [unit]
-        """ 
-        return "Bound state found at E_b=" in line
-    def get_e(line):
-        """assuming bound_state_line(line) == True, return E as a string"""
-        # remove the initial bit, as well as extra whitespace
-        E = line.replace("Bound state found at E_b=", "").strip()
-        return E
-
-
     for line in lines:
+        # if we can get one of the constants for this file, do it
+        if groud_e_line(line):
+            ground_E = get_ground_e(line)
+        elif thresh_e_line(line):
+            thresh_E = get_thresh_e(line)
+
         # get J, T, parity, E
-        if step in ["looking for bound state", "done"]:
+        elif step in ["looking for bound state", "done"]:
             # safe to assume that if we find a bound state, we'll find
             # J, parity, T first, so no need to make that its own step
             if j_parity_line(line):
@@ -158,7 +191,11 @@ def simplify(filename):
         states = "No bound states found..."
     else:
         states = "".join(states)
-    file_str = file_format.format(filename=filename, states=states)
+    file_str = file_format.format(
+        filename=filename,
+        ground_E=ground_E,
+        thresh_E=thresh_E,
+        states=states)
     with open(filename+"_simplified", "w+") as out_file:
         out_file.write(file_str)
     print("Done simplifying!")
