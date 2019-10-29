@@ -1,4 +1,4 @@
-# ncsmc_tools
+# ncsmc_python
 
 Python modules to help process NCSMC phase shift files and find resonances.
 
