@@ -178,4 +178,4 @@ for test_energy in test_energies:
     batch = make_run_dir(test_energy, current_energy, line_num)
 
     # run batch script
-    os.system("qsub "+batch)
+    os.system("qsub "+batch) 
