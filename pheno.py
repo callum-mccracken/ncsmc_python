@@ -32,10 +32,10 @@ input_file = "../ncsm_rgm_Am2_1_1.in"
 exe_file = "../ncsm_rgm_Am3_3_plus_Am2_1_1_rmatrix_ortg_omp_mpi.exe"
 
 
-def get_current_coupling_data(coupling_file):
-    coupling_file = join(this_dir, coupling_file)
+def get_current_state_energy(coupling_file):
+    cpl_file = join(this_dir, coupling_file)
     # get current value of state energy
-    with open(coupling_file, "r+") as kernels:
+    with open(cpl_file, "r+") as kernels:
         kernel_lines = kernels.readlines()
 
     possible_channels = []
@@ -73,7 +73,7 @@ def get_current_coupling_data(coupling_file):
             line_num = i
     return min_E, line_num
 
-def get_ground_state(dot_out_file):
+def get_ground_state_energy(dot_out_file):
     dot_out_file = join(this_dir, dot_out_file)
     with open(dot_out_file, "r+") as out_file:
         lines = out_file.readlines()
@@ -91,7 +91,8 @@ def get_ground_state(dot_out_file):
 def make_run_dir(new_energy, old_energy, line_num):
     """put all necessary files in a run directory"""
     # first off make the dir
-    run_dir = join(this_dir, "E_"+str(new_energy))
+    e_str = "{:05f}".format(new_energy).replace(".", "_").replace("-", "neg_")
+    run_dir = join(this_dir, "E_"+e_str)
     # if it exists delete it
     if exists(run_dir):
         shutil.rmtree(run_dir)
@@ -158,26 +159,23 @@ def make_run_dir(new_energy, old_energy, line_num):
     # that should be it! Return batch file so we can run that later
     return new_batch
 
-# get line number of the line with lowest energy + that energy value
-current_energy, line_num = get_current_coupling_data(coupling_kernels_file)
+# get value of lowest energy of the state we want (as well as its line number)
+current_energy, line_num = get_current_state_energy(coupling_kernels_file)
 
-# get ground state energy
-ground_state_E = get_ground_state(dot_out_file)
+# get ground state energy from .out file
+ground_state_E = get_ground_state_energy(dot_out_file)
 
-# figure out how much we need to nudge it
-ideal_energy = tunl_E + ground_state_E
+# this is the tunl value, just shifted
+experiment_energy = tunl_E + ground_state_E
 
-error = abs(ideal_energy - current_energy)
+print("we are off by", abs(experiment_energy - current_energy), "MeV")
 
+test_energies = np.linspace(current_energy, experiment_energy, 10)
 
-print("we are off by "+str(error)+" MeV")
-
-nudges = np.linspace(current_energy, ideal_energy, 10)
-for nudge in nudges:
-    #test_value = tunl_E + nudge
-
+for test_energy in test_energies:
+    print("running NCSMC for E =", test_energy, "MeV")
     # make a directory with all required input files for NCSMC
-    batch = make_run_dir(nudge, current_energy, line_num)
+    batch = make_run_dir(test_energy, current_energy, line_num)
 
-    #print(batch)
+    # run batch script
     os.system("qsub "+batch)
