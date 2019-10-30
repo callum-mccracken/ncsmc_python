@@ -179,5 +179,5 @@ for nudge in nudges:
     # make a directory with all required input files for NCSMC
     batch = make_run_dir(nudge, current_energy, line_num)
 
-    print(batch)
-    #os.system("qsub "+batch)
+    #print(batch)
+    os.system("qsub "+batch)
