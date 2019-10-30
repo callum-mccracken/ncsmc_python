@@ -142,14 +142,14 @@ def make_run_dir(new_energy, old_energy, line_num):
     current_batch = realpath(join(this_dir, batch_file))
     new_batch = join(run_dir, split(batch_file)[-1])
     shutil.copyfile(current_batch, new_batch)
-    cd_line = 0
     with open(new_batch, "r+") as batch:
         lines = batch.readlines()
-        for index, line in enumerate(lines):
-            words = line.split()
-            if "cd" in words:
-                cd_line = index
-                break
+    cd_line = 0
+    for index, line in enumerate(lines):
+        words = line.split()
+        if "cd" in words:
+            cd_line = index
+            break
     if cd_line == 0:
         raise ValueError("we didn't find a cd line in the batch script!")
     lines[cd_line] = "cd "+run_dir
