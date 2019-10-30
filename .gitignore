@@ -18,3 +18,4 @@ lib64
 **.DS_Store
 fitter.py
 gui_fitter.py
+**/E_*

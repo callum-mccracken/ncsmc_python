@@ -14,7 +14,7 @@ python output_simplifier.py -f [filename]
 import argparse
 import re
 
-import utils
+from . import utils
 
 # enter a filename here,
 # or run this with "python output_simplifier.py -f [file]"
