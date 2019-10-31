@@ -7,10 +7,11 @@ from os.path import relpath, dirname, join, realpath, split, exists
 import os
 import shutil
 import numpy as np
+this_dir = dirname(__file__)  # directory of current file, for use later
 
 # NOTE: All energies in here are in MeV!
 
-# define a channel to mess with
+# define a channel to adjust
 J = 1
 J2 = J * 2
 parity = -1  # 1 or -1
@@ -22,8 +23,11 @@ T = 0
 # data from TUNL
 tunl_E = 10.847  # above ground state energy
 
-# TODO: can we auto-generate this filename?
-this_dir = dirname(__file__)
+# we'll make adjustments from our current energy value to the tunl value
+# how many adjustments do we make?
+n_adjustments = 10
+
+# relative paths are okay, relative to the directory containing this file
 batch_file = "../runaem0105.sh"
 coupling_kernels_file = "../C12_B11_coupling_kernels_Nmax06_81314_10n_4n.dat"
 rgm_kernels_file = "../B11_RGM_kernels_Nmax06_81314_4n.dat"
@@ -92,7 +96,7 @@ def make_run_dir(new_energy, old_energy, line_num):
     """put all necessary files in a run directory"""
     # first off make the dir
     e_str = "{:05f}".format(new_energy).replace(".", "_").replace("-", "neg_")
-    run_dir = join(this_dir, "E_"+e_str)
+    run_dir = realpath(join(this_dir, "E_"+e_str))
     # if it exists delete it
     if exists(run_dir):
         shutil.rmtree(run_dir)
@@ -159,23 +163,26 @@ def make_run_dir(new_energy, old_energy, line_num):
     # that should be it! Return batch file so we can run that later
     return new_batch
 
-# get value of lowest energy of the state we want (as well as its line number)
-current_energy, line_num = get_current_state_energy(coupling_kernels_file)
+def adjust_energy(n_points):
+    # get value of lowest energy of the state we want
+    # (as well as its line number)
+    current_energy, line_num = get_current_state_energy(coupling_kernels_file)
 
-# get ground state energy from .out file
-ground_state_E = get_ground_state_energy(dot_out_file)
+    # get ground state energy from .out file
+    ground_state_E = get_ground_state_energy(dot_out_file)
 
-# this is the tunl value, just shifted
-experiment_energy = tunl_E + ground_state_E
+    # this is the tunl value, just shifted
+    experiment_energy = tunl_E + ground_state_E
 
-print("we are off by", abs(experiment_energy - current_energy), "MeV")
+    print("we are off by", abs(experiment_energy - current_energy), "MeV")
 
-test_energies = np.linspace(current_energy, experiment_energy, 10)
+    test_energies = np.linspace(current_energy, experiment_energy, n_points)
 
-for test_energy in test_energies:
-    print("running NCSMC for E =", test_energy, "MeV")
-    # make a directory with all required input files for NCSMC
-    batch = make_run_dir(test_energy, current_energy, line_num)
+    for test_energy in test_energies:
+        print("running NCSMC for E =", test_energy, "MeV")
+        # make a directory with all required input files for NCSMC
+        batch = make_run_dir(test_energy, current_energy, line_num)
+        # run batch script
+        os.system("qsub "+batch)
 
-    # run batch script
-    os.system("qsub "+batch) 
+adjust_energy(n_adjustments)
