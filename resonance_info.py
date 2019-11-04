@@ -11,8 +11,8 @@ import os
 from os.path import join, exists
 import argparse
 
-import flipper
-import utils
+from . import flipper
+from . import utils
 
 filename = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
 flipped = True
@@ -21,6 +21,8 @@ def get_resonance_info(filename, already_flipped=False):
     """Takes a ncsmc filename and writes info about each channel to a CSV
     file, with information about whether or not there is a resonance there."""
     filename = utils.abs_path(filename)
+    phase_word = "Eigenphase" if "eigen" in filename else "Phase"
+
     # first flip the file if needed
     if already_flipped:
         new_filename = filename
@@ -57,7 +59,8 @@ def get_resonance_info(filename, already_flipped=False):
     # write resonance info to a file, (res = resonance)
     if not exists(utils.output_dir):
         os.mkdir(utils.output_dir)
-    res_file_name = join(utils.output_dir, "resonance_info.csv")
+    res_file_title = "resonance_info_"+phase_word.lower()+".csv"
+    res_file_name = join(utils.output_dir, res_file_title)
     with open(res_file_name, "w+") as res_file:
         res_file.write("2J,parity,2T,column_number,resonance_type\n")
         for title, res_type in resonance_info.items():            

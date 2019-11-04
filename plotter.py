@@ -21,15 +21,15 @@ import argparse
 
 import matplotlib.pyplot as plt
 
-import utils
-import flipper
-from resonance_info import get_resonance_info
+from . import utils
+from . import flipper
+from .resonance_info import get_resonance_info
 
 # File path (relative paths are okay)
-filepath = "~/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/big_eigenphase_shift.agr"
+filepath = "/global/scratch/ccmccracken/Li8Li9/ncsmc/Nmax4/phase_shift.agr_flipped"
 
 # Has the file already been "flipped"?
-flipped = False
+flipped = True
 
 # Which channels should be added to the multi channel plot?
 # format: 2J, parity, 2T, column_number, resonance_type
@@ -37,8 +37,6 @@ flipped = False
 # blank lines are okay, but no extra spacing please!
 # (just paste into the space between the pair of triple quotes)
 channels_to_plot = """
-
-
 
 """
 
@@ -51,8 +49,8 @@ energy_bounds = (-inf, inf)
 output_types = ["matplotlib", "xmgrace"]  # what kind of output(s) do you want?
 
 # types of resonances to plot. Possible values: "strong", "possible", "none"
-res_types = ["strong"]
-#res_types = ["strong", "possible", "none"]  # if you want to plot everything
+#res_types = ["strong"]
+res_types = ["strong", "possible", "none"]  # if you want to plot everything
 
 def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
          output_types=["matplotlib", "xmgrace"], channels=""):
@@ -62,6 +60,8 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
     - one with all channels on the same plot
     """
     filename = utils.abs_path(filename)
+    phase_word = "Eigenphase" if "eigen" in filename else "Phase"
+
     # ensure file is flipped
     if flipped:
         new_filename = filename
@@ -124,12 +124,15 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
             if nice_title in input_titles:
                 print("adding", nice_title, "to plot\r", end="")
                 # energies may be longer than phases,
-                # so we add zeros to the start of phases if needed
+                # so we truncate energy where needed
                 len_diff = len(energies) - len(phases)
-                phases = [0 for _ in range(len_diff)] + phases
-                plot_energies = []
-                plot_phases = []
-                for e, p in zip(energies, phases):
+                if len_diff != 0:
+                    trunc_energies = energies[len_diff:]
+                else:
+                    trunc_energies = energies
+                # then only plot within the given bounds
+                plot_energies, plot_phases = [], []
+                for e, p in zip(trunc_energies, phases):
                     if l_bound <= e and e <= r_bound:
                         plot_energies.append(e)
                         plot_phases.append(p)
@@ -140,24 +143,25 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
                 c_ax.set_ylabel("Phase (degrees)")
                 c_ax.set_xlabel("Energy (MeV)")
                 c_ax.plot(plot_energies, plot_phases)
-                c_fig.savefig(join(png_dir, nice_title+".png"))
+                c_fig.savefig(join(
+                    png_dir, phase_word.lower()+"_"+nice_title+".png"))
                 plt.close(c_fig)
                 
                 # save channel to a file too, so we can use it later
-                csv_name = join(csv_dir, nice_title+".csv")
+                csv_name = join(
+                    csv_dir, phase_word.lower()+"_"+nice_title+".csv")
                 with open(csv_name, "w+") as csv_file:
                     for e, p in zip(plot_energies, plot_phases):
                         csv_file.write(",".join([str(e), str(p)]) + "\n")
                 to_plot.append((plot_energies, plot_phases, nice_title))
 
-
         # set up main plot
-        plt.title("Multi-Channel Plot")
+        plt.title("Multi-Channel "+phase_word+" Shifts")
         plt.ylabel("Phase (degrees)")
         plt.xlabel("Energy (MeV)")
         for energy, phase, title in to_plot:
             plt.plot(energy, phase, label=title)
-        main_plot_path = join(png_dir, "multi_channel_plot.png")
+        main_plot_path = join(png_dir, phase_word.lower()+"_plot.png")
         plt.legend(loc='upper right', shadow=False, fontsize='xx-small')
         plt.savefig(main_plot_path)
         main_plot_paths.append(main_plot_path)
@@ -175,7 +179,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
                 # energies may be longer than phases,
                 # so we add zeros to the start of phases if needed
                 len_diff = len(energies) - len(phases)
-                phases = [0 for _ in range(len_diff)] + phases
+                phases = [phases[0] for _ in range(len_diff)] + phases
                 plot_energies = []
                 plot_phases = []
                 for e, p in zip(energies, phases):
@@ -202,10 +206,11 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
                 channel_string = "\n".join(lines)
 
                 # save channel to the output file
-                grdt_name = join(grace_dir, nice_title+".grdt")
+                grdt_name = join(
+                    grace_dir, phase_word.lower()+"_"+nice_title+".grdt")
                 with open(grdt_name, "w+") as channel_file:
                     channel_file.write(channel_string)
-        main_plot_path = join(grace_dir, "multi_channel_plot.grdt")
+        main_plot_path = join(grace_dir, phase_word.lower()+"_plot.grdt")
         # write overall file
         with open(main_plot_path, "w+") as grace_file:
             grace_file.write(grace_string)

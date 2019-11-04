@@ -22,7 +22,7 @@ import argparse
 
 import numpy as np
 
-import utils
+from . import utils
 
 filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
 
@@ -96,21 +96,30 @@ def separate_into_sections(list_of_nums):
             [1, 2, 3, 4]
         ]
     ]
+
+    I do realize some sections might have the same lengths, one after the other
+    (especially at the interface between megasections) and that is dealt with.
     """
     # list_of_nums is a list of lists of numbers, 
-    # from the file but not strings anymore
+    # from the file but not formatted as strings anymore
     sections = []
     section = []
-    last_length = 0  # since we can't assume every file starts with 2 cols
+    last_line = []
+
+    # the list at the end ensures that we save the last section
     for line in list_of_nums + [[0]]:
-        # the list at the end ensures that we save the last section
-        if len(line) == last_length:
-            section.append(line)
+        if len(line) == len(last_line):
+            if line[0] > last_line[0]:  # try to append line
+                section.append(line)
+            else:  # but if the energy dropped, we have a new section
+                if section != []:
+                    sections.append(section)
+                section = [line]
         else:
             if section != []:  # no sense keeping sections with no lines
                 sections.append(section)
             section = [line]
-            last_length = len(line)
+        last_line = line
 
     # check that section creation worked:
     for section in sections:
@@ -268,8 +277,10 @@ def write_data(sections, text_lines, filename):
                 # lines at the interface
                 top_line = top_section[-1]
                 bottom_line = bottom_section[0]
-                if len(top_line) > len(bottom_line):
-                    # next title and "&"
+                # if the energy (first entry) in top > energy in bottom,
+                # add a text line
+                if top_line[0] > bottom_line[0]:
+                    # next title and "&" (2 lines)
                     write_file.write(text_lines[tlc])
                     tlc += 1
                     write_file.write(text_lines[tlc])
@@ -544,6 +555,10 @@ def start_from_zero(sections):
 
 def flip(read_filename):
     """Performs flipping operation from start to finish"""
+    eigen = False
+    if "eigen" in read_filename:
+        eigen = True
+    
     print("Flipping...\r", end="")
     read_filename = utils.abs_path(read_filename)
     # read from original file
@@ -551,9 +566,14 @@ def flip(read_filename):
     
     # perform operations to get desired data
     sections = separate_into_sections(number_lines)
-    sections = flip_columns(sections)
+    # only the eigenphase_shift files need columns rearranged
+    # actually apparently this issue has been solved!
+    # so we don't need to flip columns here either
+    #if eigen:
+    #    sections = flip_columns(sections)
     sections = flip_all_sections(sections)
-    sections = start_from_zero(sections)
+    # Petr wasn't a fan of starting from zero, so let's not
+    #sections = start_from_zero(sections)
     
     # write to another file
     new_filename = write_data(sections, text_lines, read_filename)
