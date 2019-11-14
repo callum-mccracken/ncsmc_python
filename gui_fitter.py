@@ -1,4 +1,5 @@
 """module for fitting functions to data interactively"""
+import csv
 import numpy as np
 from os.path import join
 import matplotlib.pyplot as plt
@@ -6,57 +7,83 @@ from matplotlib.widgets import Slider, Button, TextBox
 
 from utils import output_dir
 
-from fitter import read_csv, fit_cubic
 
-n_fit = 100  # how many points to draw for the fit
+def read_csv(filename):
+    with open(filename, 'r') as f:
+        reader = csv.reader(f)
+        csv_values = np.array(list(reader), dtype=float)
+    # data_list is structured like [[line, one], [line, two]]
+    # we want the transpose, [[col, one], [col, two]]
+    csv_values = csv_values.T
+    if len(csv_values) != 2:
+        raise ValueError("This function was only made for reading two columns!")
+    x, y = csv_values[:]
+    return x, y
+
+
+def fit_cubic(x, y):
+    """a fit of the form a + bx + cx^2 + dx^3"""
+    d, c, b, a = np.polyfit(x, y, 3)
+    def cubic(x):
+        return a + b * x + c * x ** 2 + d * x ** 3
+    return cubic, a, b, c, d
+
 
 def make_plot(x, y, title):
     """this function makes an interactive plot for finding resonances"""
-    # x is increasing uniformly, right???
-    increment = x[1] - x[0]
+
+    n_fit = 100  # how many points to draw when we plot the fit
+
+    increment = x[1] - x[0]  # x is increasing uniformly, right???
 
     # basic plot setup
     fig, ax = plt.subplots()
     plt.subplots_adjust(bottom=0.25)
     plt.title("Resonance Finder\n"+title)
     plt.xlabel("Energy ($MeV$)")
-    plt.ylabel("Phase ($\\circ$)")
+    plt.ylabel("Phase ($^\\circ$)")
+    ax.margins(x=0)
 
     # set up sliders
-    ax.margins(x=0)
-    colour = 'wheat'
-    r_bound_box = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=colour)
-    l_bound_box = plt.axes([0.25, 0.05, 0.65, 0.03], facecolor=colour)
+    clear = (0, 0, 0, 0)  # RGBA clear
+    triumf_blue = "#009fdf"
+    r_bound_box = plt.axes((0.25, 0.1, 0.65, 0.03), facecolor=clear)
+    l_bound_box = plt.axes((0.25, 0.06, 0.65, 0.03), facecolor=clear)
     r_slider = Slider(r_bound_box, 'Right (U/D keys)', min(x), max(x),
-                      valinit=max(x))
+                      valinit=max(x), color=triumf_blue)
     l_slider = Slider(l_bound_box, 'Left (L/R keys)', min(x), max(x),
-                      valinit=min(x))
-    
-    # create reset button
-    resetax = plt.axes([0.8, 0.025, 0.1, 0.04])
-    reset_button = Button(resetax, 'Reset', color=colour, hovercolor='0.975')
+                      valinit=min(x), color=triumf_blue)
 
-    # get best fit function. Note that it's a fit of the form x = fit(y)
-    # since we're going to fit the cubic 
+    # create reset button
+    resetax = plt.axes((0.8, 0.01, 0.1, 0.04))
+    reset_button = Button(resetax, 'Reset', color=clear, hovercolor='0.975')
+
+    # fit the cubic y = cubic(x)
     cubic, _, b, c, d = fit_cubic(x, y)
-    fit_y = np.linspace(min(y), max(y), num=n_fit)
-    fit_x = cubic(fit_y)
-    
-    # calculate steepest point, 2/derivative (in  radians) there
-    steepest_x = - c / (3 * d)
-    two_over_dydx = 2 / np.radians(b + 2*c*steepest_x + 3*d*steepest_x**2)
+    fit_x = np.linspace(min(x), max(x), num=n_fit)
+    fit_y = [cubic(xi) for xi in fit_x]
+
+    # calculate resonance E, width
+    res_energy = - c / (3 * d)
+    width = 2 / np.radians(b + 2*c*res_energy + 3*d*res_energy**2)
 
     # set up on-screen text
-    steep_ax = plt.axes([0.7, 0.3, 0.15, 0.05])
-    steep_text_box = TextBox(steep_ax, '$E_{steep} =$',
-                             initial="{:5f}".format(steepest_x), color=colour)
-    two_over_dydx_ax = plt.axes([0.3, 0.3, 0.15, 0.05])
-    dydx_text_box = TextBox(two_over_dydx_ax, '$dydx =$',
-                       initial="{:5f}".format(two_over_dydx), color=colour)
+    res_energy_ax = plt.axes((0.7, 0.3, 0.2, 0.05))
+    res_energy_text_box = TextBox(
+        res_energy_ax, '$E_{resonance} =$',
+        initial="{:2f}".format(res_energy), color=clear)
+    width_ax = plt.axes((0.7, 0.35, 0.2, 0.05))
+    width_text_box = TextBox(
+        width_ax, '$Width =$',
+        initial="{:2f}".format(width), color=clear)
+    points_ax = plt.axes((0.7, 0.25, 0.2, 0.05))
+    points_text_box = TextBox(
+        points_ax, '$N_{points} =$',
+        initial=str(len(x)), color=clear)
 
     # plot data and fit
-    data_line, = ax.plot(x, y, 'b-', marker=".", mfc="k")
-    fit_line, = ax.plot(fit_x, fit_y, 'g--')
+    data_line, = ax.plot(x, y, '-', color=triumf_blue)
+    fit_line, = ax.plot(fit_x, fit_y, 'k--')
 
     # function to redraw graph
     def update(val):
@@ -64,17 +91,17 @@ def make_plot(x, y, title):
         right = r_slider.val
         
         # get data that is within bounds
-        indices = np.where((left <= x) <= right)
-        bounded_y = y[indices]
+        indices = (left <= x) * (x <= right)
         bounded_x = x[indices]
+        bounded_y = y[indices]
         
         data_line.set_ydata(bounded_y)
         data_line.set_xdata(bounded_x)
         
         # make new fit with that data
-        new_cubic, _, b, c, d = fit_cubic(bounded_y, bounded_x)
-        bounded_fit_y = np.linspace(min(bounded_y), max(bounded_y), num=n_fit)
-        bounded_fit_x = new_cubic(bounded_fit_y)
+        new_cubic, _, new_b, new_c, new_d = fit_cubic(bounded_x, bounded_y)
+        bounded_fit_x = np.linspace(min(bounded_x), max(bounded_x), num=n_fit)
+        bounded_fit_y = np.array([new_cubic(xi) for xi in bounded_fit_x])
 
         fit_line.set_ydata(bounded_fit_y)
         fit_line.set_xdata(bounded_fit_x)
@@ -83,11 +110,17 @@ def make_plot(x, y, title):
         ax.set_ylim(min(bounded_y), max(bounded_y)*1.1)
 
         # calculate values for text boxes
-        steepest_x = - c / (3 * d)
-        two_over_dydx = 2 / np.radians(b + 2*c*steepest_x + 3*d*steepest_x**2)
-        steep_text_box.set_val("{:5f}".format(steepest_x))
-        dydx_text_box.set_val("{:5f}".format(two_over_dydx))
+        new_e_res = - new_c / (3 * new_d)
+        res_energy_text_box.set_val("{:2f}".format(new_e_res))
+
+        new_width = 2 / np.radians(
+            new_b + 2*new_c*new_e_res + 3*new_d*new_e_res**2)
+        width_text_box.set_val("{:2f}".format(new_width))
+
+        points_text_box.set_val(str(len(bounded_x)))
+
         fig.canvas.draw_idle()
+
     l_slider.on_changed(update)
     r_slider.on_changed(update)
 
@@ -114,21 +147,24 @@ def make_plot(x, y, title):
     # finally, display the plot
     plt.show()
 
-
-
-if __name__ == "__main__":
+def find_resonance(csv_filename):
     # get data from csv file
-    resonance_title = "2_-_2_column_2.csv"
-    x, y = read_csv(join(output_dir, "CSVs", resonance_title))
+    x, y = read_csv(join(output_dir, "CSVs", csv_filename))
     
-    J2, parity, T2, _, col = resonance_title[:-4].split("_")
+    J2, parity, T2, _, _ = csv_filename[:-4].split("_")
     J_int = int(J2) / 2 == int(int(J2) / 2)
     T_int = int(T2) / 2 == int(int(T2) / 2)
     
 
-    J = str(int(J2) / 2) if J_int else "$\\frac{"+J2+"}{2}$"
-    T = str(int(T2) / 2) if T_int else "$\\frac{"+T2+"}{2}$"
+    J = str(int(int(J2) / 2)) if J_int else "$\\frac{"+J2+"}{2}$"
+    T = str(int(int(T2) / 2)) if T_int else "$\\frac{"+T2+"}{2}$"
 
     nice_title = "$J$: " + J + ", $\\pi$: " + parity + ", $T$: " + T
 
     make_plot(x, y, nice_title)
+
+
+
+
+if __name__ == "__main__":
+    find_resonance("2_-_2_column_2.csv")
