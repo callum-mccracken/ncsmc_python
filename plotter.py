@@ -21,12 +21,12 @@ import argparse
 
 import matplotlib.pyplot as plt
 
-from . import utils
-from . import flipper
-from .resonance_info import get_resonance_info
+import utils
+import flipper
+from resonance_info import get_resonance_info
 
 # File path (relative paths are okay)
-filepath = "/global/scratch/ccmccracken/Li8Li9/ncsmc/Nmax4/phase_shift.agr_flipped"
+filepath = "/global/scratch/ccmccracken/Li8Li9/ncsmc/Nmax6/eigenphase_shift.agr"
 
 # Has the file already been "flipped"?
 flipped = True

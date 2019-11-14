@@ -12,7 +12,7 @@ lib64
 **.pyo
 **/instructions*
 **/ncsmc_output*
-**/resonances*
+**/*resonances*
 **/to_be_flipped*
 **.json
 **.DS_Store

@@ -11,8 +11,8 @@ import os
 from os.path import join, exists
 import argparse
 
-from . import flipper
-from . import utils
+import flipper
+import utils
 
 filename = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
 flipped = True

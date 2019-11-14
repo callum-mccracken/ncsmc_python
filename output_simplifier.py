@@ -14,11 +14,11 @@ python output_simplifier.py -f [filename]
 import argparse
 import re
 
-from . import utils
+import utils
 
 # enter a filename here,
 # or run this with "python output_simplifier.py -f [file]"
-filename = "ncsmc_output/ncsm_rgm_Am2_1_1.out"
+filename = "/global/scratch/ccmccracken/Li8Li9/ncsmc/Nmax6/ncsm_rgm_Am2_1_1.out"
 
 # edit these two if you want to change the format of the output
 file_format = """Simplified View of {filename}:
@@ -34,7 +34,7 @@ Groud State Energy = {ground_E} MeV
 
 state_format = """
 =========================================================================
-State Energy = {E} MeV
+Bound State Energy = {E} MeV
 J = {J}
 T = {T}
 Parity = {parity}

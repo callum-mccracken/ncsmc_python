@@ -22,7 +22,7 @@ import argparse
 
 import numpy as np
 
-from . import utils
+import utils
 
 filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
 
@@ -518,31 +518,37 @@ def flip_all_sections(sections):
 
 
 def start_from_zero(sections):
-    """Ensure that all channels start at zero"""
-    
+    """Ensure that all channels start at zero,
+    or rather that they don't start at like 180 or -180 or something.
+
+    Make them start from, say, 0.1, not 180.1"""
+
     # get megasections
     mega_sections = separate_into_megasections(sections)
-    
+
     for ms in mega_sections:
         num_cols = max(len(line) for line in ms)
-        
-        # find first element in each column
-        first_elements = [None for _ in range(num_cols)]
+
+        # find how much we must add / subtract to each column (multiples of 180)
+        first_nums = [None for _ in range(num_cols)]
+        to_add = [None for _ in range(num_cols)]
         for line in ms:
             for i in range(num_cols):
-                if (first_elements[i] is None) and (i < len(line)):
-                    first_elements[i] = line[i]
-            if all(x is not None for x in first_elements):
+                if (to_add[i] is None) and (i < len(line)):
+                    # get how many 180s we have to add to get close to zero
+                    to_add[i] = - int(line[i] / 180) * 180
+                    first_nums[i] = line[i]
+            if all(x is not None for x in to_add):
                 break
-        # now subtract that from every other member
+        # now add that to every member of list
         for i in range(len(ms)):
             line = ms[i]
             for j in range(len(line)):
                 if j == 0:  # don't mess with the energies!
                     continue
-                line[j] = line[j] - first_elements[j]
+                line[j] = line[j] + to_add[j]
             ms[i] = line
-    
+
     # now stitch all the megasections back into a list of lists of numbers
     list_of_lines = []
     for ms in mega_sections:
@@ -572,10 +578,10 @@ def flip(read_filename):
     #if eigen:
     #    sections = flip_columns(sections)
     sections = flip_all_sections(sections)
-    # Petr wasn't a fan of starting from zero, so let's not
-    #sections = start_from_zero(sections)
-    
-    # write to another file
+    # "start from zero" = make sections start within -180 --> 180
+    sections = start_from_zero(sections)
+
+    # write to output file
     new_filename = write_data(sections, text_lines, read_filename)
 
     print("Your data has been flipped! Output:", new_filename)
