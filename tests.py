@@ -3,7 +3,7 @@ import output_simplifier
 import resonance_info
 import resonance_plotter
 import gui_fitter
-import pheno
+#import pheno
 import scheme_plot
 import utils
 
