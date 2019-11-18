@@ -21,12 +21,15 @@ import argparse
 
 import matplotlib.pyplot as plt
 
-from . import utils
-from . import flipper
-from .resonance_info import get_resonance_info
+import utils
+import flipper
+from resonance_info import get_resonance_info
 
 # File path (relative paths are okay)
 filepath = "/global/scratch/ccmccracken/Li8Li9/ncsmc/Nmax4/phase_shift.agr_flipped"
+
+# value of Nmax, for file naming purposes
+Nmax = 4
 
 # Has the file already been "flipped"?
 flipped = True
@@ -60,7 +63,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
     - one with all channels on the same plot
     """
     filename = utils.abs_path(filename)
-    phase_word = "Eigenphase" if "eigen" in filename else "Phase"
+    phase_word = "eigenphase" if "eigen" in filename else "phase"
 
     # ensure file is flipped
     if flipped:
@@ -103,11 +106,12 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
     # This also means we can add new output types more easily (hopefully).
 
     main_plot_paths = []
-    if not exists(utils.output_dir):
-        os.mkdir(utils.output_dir)
-    png_dir = join(utils.output_dir, "PNGs")
-    csv_dir = join(utils.output_dir, "CSVs")
-    grace_dir = join(utils.output_dir, "grace_files")
+    output_dir = utils.output_dir.format(Nmax)
+    if not exists(output_dir):
+        os.mkdir(output_dir)
+    png_dir = join(output_dir, "PNGs_"+phase_word)
+    csv_dir = join(output_dir, "CSVs_"+phase_word)
+    grace_dir = join(output_dir, "grace_files_"+phase_word)
     for d in [png_dir, csv_dir, grace_dir]:
         if not exists(d):
             os.mkdir(d)
@@ -144,24 +148,24 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
                 c_ax.set_xlabel("Energy (MeV)")
                 c_ax.plot(plot_energies, plot_phases)
                 c_fig.savefig(join(
-                    png_dir, phase_word.lower()+"_"+nice_title+".png"))
+                    png_dir, phase_word+"_"+nice_title+".png"))
                 plt.close(c_fig)
                 
                 # save channel to a file too, so we can use it later
                 csv_name = join(
-                    csv_dir, phase_word.lower()+"_"+nice_title+".csv")
+                    csv_dir, phase_word+"_"+nice_title+".csv")
                 with open(csv_name, "w+") as csv_file:
                     for e, p in zip(plot_energies, plot_phases):
                         csv_file.write(",".join([str(e), str(p)]) + "\n")
                 to_plot.append((plot_energies, plot_phases, nice_title))
 
         # set up main plot
-        plt.title("Multi-Channel "+phase_word+" Shifts")
+        plt.title("Multi-Channel "+phase_word.title()+" Shifts")
         plt.ylabel("Phase (degrees)")
         plt.xlabel("Energy (MeV)")
         for energy, phase, title in to_plot:
             plt.plot(energy, phase, label=title)
-        main_plot_path = join(png_dir, phase_word.lower()+"_plot.png")
+        main_plot_path = join(png_dir, phase_word+"_plot.png")
         plt.legend(loc='upper right', shadow=False, fontsize='xx-small')
         plt.savefig(main_plot_path)
         main_plot_paths.append(main_plot_path)
@@ -207,10 +211,10 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
 
                 # save channel to the output file
                 grdt_name = join(
-                    grace_dir, phase_word.lower()+"_"+nice_title+".grdt")
+                    grace_dir, phase_word+"_"+nice_title+".grdt")
                 with open(grdt_name, "w+") as channel_file:
                     channel_file.write(channel_string)
-        main_plot_path = join(grace_dir, phase_word.lower()+"_plot.grdt")
+        main_plot_path = join(grace_dir, phase_word+"_plot.grdt")
         # write overall file
         with open(main_plot_path, "w+") as grace_file:
             grace_file.write(grace_string)

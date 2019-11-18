@@ -11,8 +11,8 @@ import os
 from os.path import join, exists
 import argparse
 
-from . import flipper
-from . import utils
+import flipper
+import utils
 
 filename = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
 flipped = True
@@ -56,11 +56,15 @@ def get_resonance_info(filename, already_flipped=False):
             # anything we should do here?
             pass
 
+    print("For the purposes of file naming, what Nmax did you use?")
+    Nmax = int(input("Enter an integer for Nmax: "))
+
     # write resonance info to a file, (res = resonance)
-    if not exists(utils.output_dir):
-        os.mkdir(utils.output_dir)
-    res_file_title = "resonance_info_"+phase_word.lower()+".csv"
-    res_file_name = join(utils.output_dir, res_file_title)
+    output_dir = utils.output_dir.format(Nmax)
+    if not exists(output_dir):
+        os.mkdir(output_dir)
+    res_file_title = "resonances_"+phase_word.lower()+"_Nmax_"+Nmax+".csv"
+    res_file_name = join(output_dir, res_file_title)
     with open(res_file_name, "w+") as res_file:
         res_file.write("2J,parity,2T,column_number,resonance_type\n")
         for title, res_type in resonance_info.items():            

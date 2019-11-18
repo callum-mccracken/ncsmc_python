@@ -5,7 +5,7 @@ from os.path import join
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, TextBox
 
-from utils import output_dir
+import utils
 
 
 def read_csv(filename):
@@ -17,7 +17,7 @@ def read_csv(filename):
     csv_values = csv_values.T
     if len(csv_values) != 2:
         raise ValueError("This function was only made for reading two columns!")
-    x, y = csv_values[:]
+    x, y = np.array(csv_values)[:]
     return x, y
 
 
@@ -149,7 +149,7 @@ def make_plot(x, y, title):
 
 def find_resonance(csv_filename):
     # get data from csv file
-    x, y = read_csv(join(output_dir, "CSVs", csv_filename))
+    x, y = read_csv(csv_filename)
     
     J2, parity, T2, _, _ = csv_filename[:-4].split("_")
     J_int = int(J2) / 2 == int(int(J2) / 2)
@@ -162,9 +162,3 @@ def find_resonance(csv_filename):
     nice_title = "$J$: " + J + ", $\\pi$: " + parity + ", $T$: " + T
 
     make_plot(x, y, nice_title)
-
-
-
-
-if __name__ == "__main__":
-    find_resonance("2_-_2_column_2.csv")

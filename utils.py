@@ -3,7 +3,7 @@
 import os
 
 # directory where we'll store info about resonances
-output_dir = os.path.join(os.path.dirname(__file__), "resonances")
+output_dir = os.path.join(os.path.dirname(__file__), "resonances_Nmax{}")
 
 def abs_path(path):
     """return the absolute path to a file"""
