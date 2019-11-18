@@ -18,8 +18,9 @@ filename = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flippe
 flipped = True
 
 def get_resonance_info(filename, already_flipped=False):
-    """Takes a ncsmc filename and writes info about each channel to a CSV
-    file, with information about whether or not there is a resonance there."""
+    """Parses a ncsmc (eigen)phase shift file and writes info about each
+     channel to a .csv file, with information about whether or not there is a
+     resonance there. Returns name of said .csv file"""
     filename = utils.abs_path(filename)
     phase_word = "Eigenphase" if "eigen" in filename else "Phase"
 

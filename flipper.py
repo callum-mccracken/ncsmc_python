@@ -554,7 +554,8 @@ def start_from_zero(sections):
 
 
 def flip(read_filename):
-    """Performs flipping operation from start to finish"""
+    """Performs flipping operation from start to finish,
+     returns the filename of the flipped file"""
     print("Flipping...\r", end="")
     read_filename = utils.abs_path(read_filename)
     # read from original file

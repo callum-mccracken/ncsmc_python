@@ -6,7 +6,7 @@ makes both by default.
 
 Can be run with
 
-python plotter.py -f /path/to/some/file (assumes file is not flipped)
+python resonance_plotter.py -f /path/to/some/file (assumes file is not flipped)
 
 It will:
 - flip the file (output saved in same directory as original file)
@@ -52,16 +52,19 @@ energy_bounds = (-inf, inf)
 output_types = ["matplotlib", "xmgrace"]  # what kind of output(s) do you want?
 
 # types of resonances to plot. Possible values: "strong", "possible", "none"
-#res_types = ["strong"]
-res_types = ["strong", "possible", "none"]  # if you want to plot everything
+#res_types = ["strong"]  # if you just want strong resonances
+res_types = "all"  # if you want to plot everything
 
-def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
-         output_types=["matplotlib", "xmgrace"], channels=""):
+def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
+         output_types="all", channels=""):
     """
     Makes a whole bunch of plots.
     - one for each of the user-specified channels
     - one with all channels on the same plot
     """
+    if res_types == "all":
+        res_types = ["strong", "possible", "none"]
+
     filename = utils.abs_path(filename)
     phase_word = "eigenphase" if "eigen" in filename else "phase"
 
@@ -115,11 +118,10 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
     for d in [png_dir, csv_dir, grace_dir]:
         if not exists(d):
             os.mkdir(d)
-
+    if output_types == "all":
+        output_types = ["matplotlib", "xmgrace", "csv"]
     if "matplotlib" in output_types:
         print("Working on output type 'matplotlib'...")
-        
-
         # now look in each channel, plot the ones we care about
         to_plot = []
         for title, phases in channels.items():
@@ -150,13 +152,6 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
                 c_fig.savefig(join(
                     png_dir, phase_word+"_"+nice_title+".png"))
                 plt.close(c_fig)
-                
-                # save channel to a file too, so we can use it later
-                csv_name = join(
-                    csv_dir, phase_word+"_"+nice_title+".csv")
-                with open(csv_name, "w+") as csv_file:
-                    for e, p in zip(plot_energies, plot_phases):
-                        csv_file.write(",".join([str(e), str(p)]) + "\n")
                 to_plot.append((plot_energies, plot_phases, nice_title))
 
         # set up main plot
@@ -219,6 +214,36 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types=["strong"],
         with open(main_plot_path, "w+") as grace_file:
             grace_file.write(grace_string)
         main_plot_paths.append(main_plot_path)
+    if "csv" in output_types:
+        print("Working on output type 'csv'...")
+        # now look in each channel, plot the ones we care about
+        to_plot = []
+        for title, phases in channels.items():
+            # see if the title matches one we were given. If so, plot
+            nice_title = utils.make_nice_title(title)
+            if nice_title in input_titles:
+                print("making csv for ", nice_title, "\r", end="")
+                # energies may be longer than phases,
+                # so we truncate energy where needed
+                len_diff = len(energies) - len(phases)
+                if len_diff != 0:
+                    trunc_energies = energies[len_diff:]
+                else:
+                    trunc_energies = energies
+                # then only plot within the given bounds
+                plot_energies, plot_phases = [], []
+                for e, p in zip(trunc_energies, phases):
+                    if l_bound <= e and e <= r_bound:
+                        plot_energies.append(e)
+                        plot_phases.append(p)
+
+                # save channel to a csv file
+                csv_name = join(
+                    csv_dir, phase_word+"_"+nice_title+".csv")
+                with open(csv_name, "w+") as csv_file:
+                    for e, p in zip(plot_energies, plot_phases):
+                        csv_file.write(",".join([str(e), str(p)]) + "\n")
+
     # ensure that in your output_type's if block,
     # you set main_plot_path to something useful!
     print("Done plotting! Saved main plot(s) to:")

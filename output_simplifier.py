@@ -125,6 +125,8 @@ def simplify(filename):
 
     # parameters for each bound state
     E, J, T, parity, details = default, default, default, default, default
+    # list to store E values, to return at the end
+    E_list = []
 
     # this will hold strings describing states
     states = []
@@ -176,6 +178,7 @@ def simplify(filename):
                 # save state and move on to the next one
                 states.append(state_format.format(
                     E=E, J=J, T=T, parity=parity, details=details))
+                E_list.append(E)
                 # set some parameters back to default, but not all
                 # since some might be the same as for the next state
                 E, details = default, default
@@ -198,8 +201,10 @@ def simplify(filename):
         states=states)
     with open(filename+"_simplified", "w+") as out_file:
         out_file.write(file_str)
-    print("Done simplifying!")
+    print("Done simplifying! Found bound states at "+", ".join(E_list))
     print("Output: "+filename+"_simplified")
+    return E_list
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Output Simplifier")

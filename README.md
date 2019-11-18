@@ -5,7 +5,7 @@ Python modules to help process NCSMC phase shift files and find resonances.
 There are a few useful scripts, which can all be run with `python -f [path]`,
 where `[path]` is a (possibly relative) path to a NCSMC phase shift file.
 
-You'll likely want to run `plotter.py` most often.
+You'll likely want to run `resonance_plotter.py` most often.
 
 ## flipper.py
 
@@ -25,14 +25,14 @@ This script extends the functionality of `flipper.py`.
 In addition to flipping, it creates a spreadsheet (`.csv` file) containing
 information about channels, and which ones might be resonances.
 
-## plotter.py
+## resonance_plotter.py
 
 This extends `resonance_info.py`.
 
 It flips, finds resonance info, and then plots each resonance.
 
 - By default, plots are only made for `strong` resonances, 
-  but that's easy to edit if you open `plotter.py` and edit one variable
+  but that's easy to edit if you open `resonance_plotter.py` and edit one variable
   (`res_types`).
 
 ## output_simplifier.py

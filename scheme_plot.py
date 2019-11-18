@@ -77,6 +77,12 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
     # then show the plot
     plt.show()
 
+
+# you provide the csv and titles
+files = ["resonance_info_Nmax_4"]
+
+
+
 n_spectra = 3
 
 # list of energies to plot
