@@ -77,28 +77,28 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
     # then show the plot
     plt.show()
 
-
-# you provide the csv and titles
-files = ["resonance_info_Nmax_4"]
-
-
-
-n_spectra = 3
-
-# list of energies to plot
-e_vals = list(range(10))
-
-# widths of resonances, 1 to 10, where 10 is the largest width and 1 is bound
-widths = [i+1 for i in range(10)]
-
-e_list = [e_vals for _ in range(n_spectra)]
-width_list = [widths for _ in range(n_spectra)]
-title_list = ["$2\\hbar\\omega$", "$4\\hbar\\omega$", "$6\\hbar\\omega$"]
-
-if len(title_list) != n_spectra:
-    raise ValueError("incorrect number of titles, n_spectra = "+str(n_spectra))
-if len(e_list) != n_spectra:
-    raise ValueError("incorrect numbe, n_spectra = "+str(n_spectra))
+if False:
+    # you provide the csv and titles
+    files = ["resonance_info_Nmax_4"]
 
 
-plot_multi_levels(e_list, width_list, title_list)
+
+    n_spectra = 3
+
+    # list of energies to plot
+    e_vals = list(range(10))
+
+    # widths of resonances, 1 to 10, where 10 is the largest width and 1 is bound
+    widths = [i+1 for i in range(10)]
+
+    e_list = [e_vals for _ in range(n_spectra)]
+    width_list = [widths for _ in range(n_spectra)]
+    title_list = ["$2\\hbar\\omega$", "$4\\hbar\\omega$", "$6\\hbar\\omega$"]
+
+    if len(title_list) != n_spectra:
+        raise ValueError("incorrect number of titles, n_spectra = "+str(n_spectra))
+    if len(e_list) != n_spectra:
+        raise ValueError("incorrect numbe, n_spectra = "+str(n_spectra))
+
+
+    plot_multi_levels(e_list, width_list, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], title_list)

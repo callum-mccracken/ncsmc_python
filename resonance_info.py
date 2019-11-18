@@ -17,12 +17,23 @@ import utils
 filename = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
 flipped = True
 
-def get_resonance_info(filename, already_flipped=False):
+def get_resonance_info(filename, Nmax=None, already_flipped=False):
     """Parses a ncsmc (eigen)phase shift file and writes info about each
      channel to a .csv file, with information about whether or not there is a
-     resonance there. Returns name of said .csv file"""
+     resonance there. Returns name of said .csv file
+     
+     filename: path to phase shift file
+
+     Nmax: integer, max number of excitations allowed
+
+     already_flipped: boolean, whether or not the file has already been
+                      "flipped" by flipper.py
+     """
     filename = utils.abs_path(filename)
     phase_word = "Eigenphase" if "eigen" in filename else "Phase"
+
+    if Nmax is None:
+        Nmax = int(input("What is Nmax? Enter an integer: "))
 
     # first flip the file if needed
     if already_flipped:
@@ -57,14 +68,11 @@ def get_resonance_info(filename, already_flipped=False):
             # anything we should do here?
             pass
 
-    print("For the purposes of file naming, what Nmax did you use?")
-    Nmax = int(input("Enter an integer for Nmax: "))
-
     # write resonance info to a file, (res = resonance)
     output_dir = utils.output_dir.format(Nmax)
     if not exists(output_dir):
         os.mkdir(output_dir)
-    res_file_title = "resonances_"+phase_word.lower()+"_Nmax_"+Nmax+".csv"
+    res_file_title = "resonances_"+phase_word.lower()+"_Nmax_"+str(Nmax)+".csv"
     res_file_name = join(output_dir, res_file_title)
     with open(res_file_name, "w+") as res_file:
         res_file.write("2J,parity,2T,column_number,resonance_type\n")

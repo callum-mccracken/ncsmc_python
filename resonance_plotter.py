@@ -56,7 +56,7 @@ output_types = ["matplotlib", "xmgrace"]  # what kind of output(s) do you want?
 res_types = "all"  # if you want to plot everything
 
 def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
-         output_types="all", channels=""):
+         output_types="all", channels="", Nmax=None):
     """
     Makes a whole bunch of plots.
     - one for each of the user-specified channels
@@ -78,7 +78,8 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
     # if no channels are provided, get them all
     if not any([utils.is_float(char) for char in channels_to_plot]):
         # get csv filename with resonance info
-        res_output_file = get_resonance_info(filename, already_flipped=True)
+        res_output_file = get_resonance_info(
+            filename, Nmax=Nmax, already_flipped=True)
         # take all channels, i.e. all text in the file
         with open(res_output_file, "r+") as channel_file:
             channels = channel_file.read()
@@ -149,8 +150,8 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
                 c_ax.set_ylabel("Phase (degrees)")
                 c_ax.set_xlabel("Energy (MeV)")
                 c_ax.plot(plot_energies, plot_phases)
-                c_fig.savefig(join(
-                    png_dir, phase_word+"_"+nice_title+".png"))
+                c_fig.savefig(join(png_dir, 
+                    phase_word+"_"+nice_title+"_Nmax_"+str(Nmax)+".png"))
                 plt.close(c_fig)
                 to_plot.append((plot_energies, plot_phases, nice_title))
 
@@ -160,7 +161,8 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
         plt.xlabel("Energy (MeV)")
         for energy, phase, title in to_plot:
             plt.plot(energy, phase, label=title)
-        main_plot_path = join(png_dir, phase_word+"_plot.png")
+        main_plot_path = join(png_dir,
+            phase_word+"_Nmax_"+str(Nmax)+"_plot.png")
         plt.legend(loc='upper right', shadow=False, fontsize='xx-small')
         plt.savefig(main_plot_path)
         main_plot_paths.append(main_plot_path)
@@ -205,11 +207,12 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
                 channel_string = "\n".join(lines)
 
                 # save channel to the output file
-                grdt_name = join(
-                    grace_dir, phase_word+"_"+nice_title+".grdt")
+                grdt_name = join(grace_dir,
+                    phase_word+"_"+nice_title+"_Nmax_"+str(Nmax)+".grdt")
                 with open(grdt_name, "w+") as channel_file:
                     channel_file.write(channel_string)
-        main_plot_path = join(grace_dir, phase_word+"_plot.grdt")
+        main_plot_path = join(grace_dir,
+            phase_word+"_plot_Nmax_"+str(Nmax)+".grdt")
         # write overall file
         with open(main_plot_path, "w+") as grace_file:
             grace_file.write(grace_string)
@@ -238,8 +241,8 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
                         plot_phases.append(p)
 
                 # save channel to a csv file
-                csv_name = join(
-                    csv_dir, phase_word+"_"+nice_title+".csv")
+                csv_name = join(csv_dir,
+                    phase_word+"_"+nice_title+"_Nmax_"+str(Nmax)+".csv")
                 with open(csv_name, "w+") as csv_file:
                     for e, p in zip(plot_energies, plot_phases):
                         csv_file.write(",".join([str(e), str(p)]) + "\n")

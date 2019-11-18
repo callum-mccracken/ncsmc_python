@@ -220,7 +220,8 @@ def simplify(filename):
         states=states)
     with open(filename+"_simplified", "w+") as out_file:
         out_file.write(file_str)
-    print("Done simplifying! Found bound states at "+", ".join(E_list))
+    E_string = ", ".join([str(E) for E in E_list])
+    print("Done simplifying! Found bound states at "+E_string)
     print("Output: "+filename+"_simplified")
     return E_list
 
