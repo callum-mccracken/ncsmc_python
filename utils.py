@@ -80,6 +80,26 @@ def make_nice_title(xmtitle):
     nice_title = "_".join([j2, parity, t2])
     return nice_title
 
+
+def make_plot_title(nice_title):
+    """makes a plottable, LaTeX formatted title, for use in matplotlib graphs"""
+    J2, parity, T2, _, col = nice_title.split("_")
+    J = float(J2) / 2
+    if J == int(J):
+        J = str(J)
+    else:
+        J = "\\frac{{{}}}{{{}}}".format(J2, 2)
+    T = float(T2) / 2
+    if T == int(T):
+        T = str(T)
+    else:
+        T = "\\frac{{{}}}{{{}}}".format(T2, 2)
+    plot_title = "$J={}, \\pi={}, T={}$, column {}".format(
+        J, parity, T, col)
+    return plot_title
+
+
+
 def xmgrace_title(xmtitle, series_num):
     """Takes an xmgrace series title and edits the series number,
     setting it equal to series_num."""
