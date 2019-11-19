@@ -49,11 +49,11 @@ channels_to_plot = """
 energy_bounds = (-inf, inf)
 
 # types of resonances to plot. Possible values: "strong", "possible", "none"
-#res_types = ["strong"]  # if you just want strong resonances
+#res_types = ["strong"]  # if you just want "strong" resonances
 res_types = "all"  # if you want to plot everything
 
 # resolution of png images, dots per inch
-dpi = 300
+dpi = 96
 
 def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
          channels="", Nmax=None):

@@ -27,11 +27,12 @@ phase_flipped = flipper.flip(phase_shift)
 eigenphase_flipped = flipper.flip(eigenphase_shift)
 
 # make simplified output file, and return energies of bound states
-#bound_states = output_simplifier.simplify(ncsmc_dot_out)
+bound_energies, bound_titles = output_simplifier.simplify(ncsmc_dot_out)
+
 
 # get info about all resonances in the files
-#phase_csv = resonance_info.get_resonance_info(phase_flipped, Nmax=Nmax, already_flipped=True)
-#eigenphase_csv = resonance_info.get_resonance_info(eigenphase_flipped, Nmax=Nmax, already_flipped=True)
+phase_csv = resonance_info.get_resonance_info(phase_flipped, Nmax=Nmax, already_flipped=True)
+eigenphase_csv = resonance_info.get_resonance_info(eigenphase_flipped, Nmax=Nmax, already_flipped=True)
 
 # plot all channels, and make csvs for each individual channel too
 #resonance_plotter.plot(phase_flipped, flipped=True, Nmax=Nmax)
@@ -40,11 +41,13 @@ eigenphase_flipped = flipper.flip(eigenphase_shift)
 # then from here you have to look at the resonance images,
 # and figure out which ones are interesting.
 
-# you're looking for phase vs energy curves that look like a smooth step
-# function, a sigmoid function, or I guess kind of like a sideways cubic.
+# you're looking for phase vs energy curves that look like
+# a sigmoid function, or I guess kind of like a cubic near the bend.
 
 # When you find those, write down their corresponding lines
 # from the resonances.csv file.
+
+# make sure to look in both files, they may not look the same in both.
 
 # one line per \n please
 phase_channels = """1,-,3,4,possible
@@ -62,48 +65,52 @@ eigenphase_channels = """3,+,3,1,strong
 7,-,3,1,strong
 """
 
-# differently formatted version for later
-phase_titles = [
-    "_".join(line.split(",")[:-1]) for line in phase_channels.splitlines()]
-eigenphase_titles = [
-    "_".join(line.split(",")[:-1]) for line in eigenphase_channels.splitlines()]
+# merge those lists
+all_str = eigenphase_channels + phase_channels
+all_channels = "\n".join(set(all_str.splitlines()))
+print(all_channels)
 
-# TODO: we should only really use one of these to figure out which
-# channels have resonances, right? Which one is it?
+# differently formatted version for later
+channel_titles = [
+    "_".join(line.split(",")[:-1]) for line in all_channels.splitlines()]
+
+# now use eigenphase file to find details about resonances
 
 # now re-plot the interesting ones / make a spaghetti plot with all those
-phase_csvs = resonance_plotter.plot(
-    phase_flipped, flipped=True, Nmax=Nmax, channels=phase_channels)
 eigenphase_csvs = resonance_plotter.plot(
-    eigenphase_flipped, flipped=True, Nmax=Nmax, channels=eigenphase_channels)
+    eigenphase_flipped, flipped=True, Nmax=Nmax, channels=all_channels)
 
-
-# now that you have these plots, use the interactive plotter thing to find the
-# energy of each resonance (i.e. it's "point of inflection", note the quotes)
-
-# TODO: I'm pretty sure we're supposed to use the other file to figure out
-# where the resonances are, right?
-
-phase_widths = []
-phase_energies = []
-for csv in phase_csvs:
-    width, energy = fitter.find_resonance(csv)
-    phase_widths.append(width)
-    phase_energies.append(energy)
-eigenphase_widths = []
-eigenphase_energies = []
-for csv in eigenphase_csvs:
-    width, energy = fitter.find_resonance(csv)
-    eigenphase_widths.append(width)
-    eigenphase_energies.append(energy)
-
-# save that information in files for easy access later
-phase_info_path = os.path.join(utils.output_dir.format(Nmax), "phase_info.csv")
+# path to save channel info
 eigenphase_info_path = os.path.join(utils.output_dir.format(Nmax), "eigenphase_info.csv")
-fitter.save_info(phase_info_path, phase_titles, phase_widths, phase_energies)
-fitter.save_info(eigenphase_info_path, eigenphase_titles, eigenphase_widths, eigenphase_energies)
 
+if not os.path.exists(eigenphase_info_path):
+    # find the energy of each resonance
+    # (i.e. point of highest slope within the "upward swoop")
+    eigenphase_widths = []
+    eigenphase_energies = []
+    for csv in eigenphase_csvs:
+        width, energy = fitter.find_resonance(csv)
+        eigenphase_widths.append(width)
+        eigenphase_energies.append(energy)
+    # save that information in files for easy access later
+    fitter.save_info(eigenphase_info_path, channel_titles, eigenphase_widths, eigenphase_energies)
+else:
+    eigenphase_widths, eigenphase_energies = [], []
+    with open(eigenphase_info_path, "r+") as open_csv:
+        lines = open_csv.readlines()[1:]
+    for line in lines:
+        _, width, energy = line.split(",")
+        eigenphase_widths.append(width)
+        eigenphase_energies.append(energy)
 
+eigenphase_energies = [float(e) for e in eigenphase_energies]
+eigenphase_widths = [float(e) for e in eigenphase_widths]
 
 # you want to include in your actual level scheme
-# you'll also need to take a look at TUNL data to figure out 
+# you'll also need to take a look at TUNL data to figure out
+
+scheme_plot.plot_multi_levels(
+    [eigenphase_energies + bound_energies],
+    [eigenphase_widths + [0]*len(bound_energies)],
+    [channel_titles + bound_titles],
+    ["$4\\hbar\\omega$"])

@@ -83,7 +83,14 @@ def make_nice_title(xmtitle):
 
 def make_plot_title(nice_title):
     """makes a plottable, LaTeX formatted title, for use in matplotlib graphs"""
-    J2, parity, T2, _, col = nice_title.split("_")
+    hunks = nice_title.split("_")
+    print(hunks)
+    if len(hunks) == 5:
+        J2, parity, T2, _, col = hunks
+    elif len(hunks) == 4:
+        J2, parity, T2, col = hunks
+    else:
+        raise ValueError("Too many or too few hunks!")
     J = float(J2) / 2
     if J == int(J):
         J = str(J)

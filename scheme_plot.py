@@ -1,7 +1,8 @@
-# libraries and data
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+import utils
 
 # general plot formatting
 plt.style.use('seaborn-white')
@@ -13,6 +14,24 @@ dpi=96
 # dimensions of spectrum plots
 x_size = 5
 y_size = 10
+
+def linewidth_from_data_units(linewidth, axis, reference='y'):
+    """
+    Convert a linewidth in data units to linewidth in points.
+
+    """
+    #Thanks! https://stackoverflow.com/questions/19394505/matplotlib-expand-the-line-with-specified-width-in-data-unit
+    fig = axis.get_figure()
+    if reference == 'x':
+        length = fig.bbox_inches.width * axis.get_position().width
+        value_range = np.diff(axis.get_xlim())
+    elif reference == 'y':
+        length = fig.bbox_inches.height * axis.get_position().height
+        value_range = np.diff(axis.get_ylim())
+    # Convert length to points
+    length *= 72
+    # Scale linewidth to value range
+    return linewidth * (length / value_range)
 
 
 def plot_levels(energies, widths, channel_titles, main_title,
@@ -33,25 +52,59 @@ def plot_levels(energies, widths, channel_titles, main_title,
     ax.set_ylabel(y_label)
     ax.set_xticks([])
 
-    # x values, it won't change much if you adjust this, but just be sure
-    # it has a non-zero length, or the lines on the plot will be dots
-    x = range(1, 11)
+    # x values, one for each resonance
+    x = range(len(energies)+1)
     # Change xlim
-    ax.set_xlim(0,len(x)+2)
+    ax.set_xlim(min(x)-1, max(x)+1)
 
     # format energies for plotting
     e_titles = ["{}".format(e) for e in energies]
     e_list = [[e]*len(x) for e in energies]
 
-    # plot each energy line
+    # make an initial skinny plot for each energy value
     for i, e in enumerate(e_list):
-        ax.plot(x, e, marker='', color=colors[i],
-                 linewidth=widths[i], alpha=0.7)
+        ax.plot(x, e, marker='', color='k', linewidth=1, alpha=1,
+                solid_capstyle="butt")
 
-    # annotate each line
-    for i, main_title in enumerate(e_titles):
-        ax.text(len(x)*1.05, i*0.99, main_title,
-                 horizontalalignment='left', size='small', color='black')
+    # set limits for which widths we'll consider out of bounds
+    factor = 0.2
+    max_y = max(energies) + factor * (max(energies)-min(energies))
+    min_y = min(energies) - factor * (max(energies)-min(energies))
+
+
+    # plot each energy line with a bar around it depending on width
+    for i, e in enumerate(e_list):
+        # figure out if this energy's width will fit on the plot
+        top = energies[i] + widths[i]
+        btm = energies[i] - widths[i]
+        itll_fit = top < max_y and btm > min_y
+
+        if widths[i] == 0:  # bound state
+            ax.plot(x, e, marker='', color="green",
+                    linewidth=1, alpha=1, solid_capstyle="butt")
+        elif itll_fit:  # typical resonance where the width bars will fit
+            x_width = linewidth_from_data_units(1, ax, reference="x")
+            x_mid = (x[i] + x[i+1]) / 2
+            ax.plot([x_mid, x_mid], [top, btm], marker='', color=colors[i],
+                    linewidth=x_width, alpha=0.7, solid_capstyle='butt')
+            ax.plot(x[i:i+2], e[i:i+2], "--", marker='', color='cyan',
+                    linewidth=1, alpha=1, solid_capstyle='butt')
+        else:  # if width is too huge to put on the plot, make it a red line
+            ax.plot(x, e, marker='', color="red",
+                    linewidth=5, alpha=0.5, solid_capstyle='butt')
+
+    # annotate each line with energy value
+    for i, e_title in enumerate(e_titles):
+        ax.text(-0.5, energies[i], "{:.2f}".format(float(e_title)),
+                 horizontalalignment='center', size='small', color='black',
+                 verticalalignment='center')
+    # annotate each line with state info (J, pi, T)
+    for i, c_title in enumerate(channel_titles):
+        plot_title = utils.make_plot_title(c_title)
+        ax.text(len(x), energies[i], plot_title,
+                 horizontalalignment='center', size='small', color='black',
+                 verticalalignment='center')
+
 
 def plot_multi_levels(energies_list, widths_list, channel_title_list,
                       main_title_list):
@@ -66,6 +119,8 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
     _, axes = plt.subplots(
         nrows=1, ncols=n_spectra, sharex=True, sharey=True,
         figsize=(x_size*n_spectra, y_size), dpi=dpi)
+    if type(axes) != np.array:
+        axes = [axes]
 
     # plot each individual spectrum
     for ax, e, w, ct, mt in zip(axes, energies_list, widths_list,
@@ -77,28 +132,3 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
     # then show the plot
     plt.show()
 
-if False:
-    # you provide the csv and titles
-    files = ["resonance_info_Nmax_4"]
-
-
-
-    n_spectra = 3
-
-    # list of energies to plot
-    e_vals = list(range(10))
-
-    # widths of resonances, 1 to 10, where 10 is the largest width and 1 is bound
-    widths = [i+1 for i in range(10)]
-
-    e_list = [e_vals for _ in range(n_spectra)]
-    width_list = [widths for _ in range(n_spectra)]
-    title_list = ["$2\\hbar\\omega$", "$4\\hbar\\omega$", "$6\\hbar\\omega$"]
-
-    if len(title_list) != n_spectra:
-        raise ValueError("incorrect number of titles, n_spectra = "+str(n_spectra))
-    if len(e_list) != n_spectra:
-        raise ValueError("incorrect numbe, n_spectra = "+str(n_spectra))
-
-
-    plot_multi_levels(e_list, width_list, [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], title_list)
