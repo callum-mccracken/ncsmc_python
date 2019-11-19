@@ -13,10 +13,11 @@ import os
 phase_shift = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/phase_shift.agr"
 eigenphase_shift = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/eigenphase_shift.agr"
 ncsmc_dot_out = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/ncsm_rgm_Am2_1_1.out"
+experiment = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/experiment_Li9.txt"
 Nmax = 4
 
 # ensure files exist and are not empty
-for f in [phase_shift, eigenphase_shift, ncsmc_dot_out]:
+for f in [phase_shift, eigenphase_shift, ncsmc_dot_out, experiment]:
     if not os.path.exists(f):
         raise IOError("file "+f+" does not exist!")
     if not os.path.getsize(phase_shift) > 0:
@@ -28,7 +29,6 @@ eigenphase_flipped = flipper.flip(eigenphase_shift)
 
 # make simplified output file, and return energies of bound states
 bound_energies, bound_titles = output_simplifier.simplify(ncsmc_dot_out)
-
 
 # get info about all resonances in the files
 phase_csv = resonance_info.get_resonance_info(phase_flipped, Nmax=Nmax, already_flipped=True)
@@ -68,7 +68,6 @@ eigenphase_channels = """3,+,3,1,strong
 # merge those lists
 all_str = eigenphase_channels + phase_channels
 all_channels = "\n".join(set(all_str.splitlines()))
-print(all_channels)
 
 # differently formatted version for later
 channel_titles = [
@@ -106,11 +105,49 @@ else:
 eigenphase_energies = [float(e) for e in eigenphase_energies]
 eigenphase_widths = [float(e) for e in eigenphase_widths]
 
-# you want to include in your actual level scheme
-# you'll also need to take a look at TUNL data to figure out
+this_nmax_energies = eigenphase_energies + bound_energies
+this_nmax_widths = eigenphase_widths + [0] * len(bound_energies)
+this_nmax_channels = channel_titles + bound_titles
+this_nmax_title = "${}\\hbar\\omega$".format(Nmax)
+
+overall_energies = []
+overall_widths = []
+overall_channels = []
+overall_titles = []
+
+overall_energies.append(this_nmax_energies)
+overall_widths.append(this_nmax_widths)
+overall_channels.append(this_nmax_channels)
+overall_titles.append(this_nmax_title)
+
+
+# grab tunl data from file
+with open(experiment, "r+") as expt_file:
+    expt_lines = expt_file.readlines()
+
+expt_energies = []
+expt_widths = []
+expt_channels =  []
+for line in expt_lines:
+    try:
+        energy, width, J, parity, T = line.split(",")
+    except ValueError:
+        # if parsing fails, no big deal, that's expected for non-data lines in
+        # the file, i.e. the preamble before the e,w,j,p,t lines
+        continue
+    channel_title = "{}_{}_{}".format(J, parity, T)
+    expt_energies.append(float(energy))
+    expt_widths.append(float(width))
+    expt_channels.append(channel_title)
+
+overall_energies.append(expt_energies)
+overall_widths.append(expt_widths)
+overall_channels.append(expt_channels)
+overall_titles.append("Experiment")
+
 
 scheme_plot.plot_multi_levels(
-    [eigenphase_energies + bound_energies],
-    [eigenphase_widths + [0]*len(bound_energies)],
-    [channel_titles + bound_titles],
-    ["$4\\hbar\\omega$"])
+    overall_energies,
+    overall_widths,
+    overall_channels,
+    overall_titles)

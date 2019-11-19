@@ -38,7 +38,7 @@ def plot_levels(energies, widths, channel_titles, main_title,
                 ax=None, y_label="Energy ($MeV$)", colors=None):
     """makes a plot of a single level scheme"""
     # set up plot
-    if ax == None:
+    if ax is None:
         _, ax = plt.subplots(figsize=(x_size, y_size), dpi=dpi)
 
     # get colors for spectra if they're not given
@@ -98,10 +98,10 @@ def plot_levels(energies, widths, channel_titles, main_title,
         ax.text(-0.5, energies[i], "{:.2f}".format(float(e_title)),
                  horizontalalignment='center', size='small', color='black',
                  verticalalignment='center')
-    # annotate each line with state info (J, pi, T)
+    # annotate each line with state info (J, pi, T, in the form J^p T)
     for i, c_title in enumerate(channel_titles):
-        plot_title = utils.make_plot_title(c_title)
-        ax.text(len(x), energies[i], plot_title,
+        plot_title = utils.plot_title_2(c_title)
+        ax.text(len(x)-0.5, energies[i], plot_title,
                  horizontalalignment='center', size='small', color='black',
                  verticalalignment='center')
 
@@ -119,7 +119,7 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
     _, axes = plt.subplots(
         nrows=1, ncols=n_spectra, sharex=True, sharey=True,
         figsize=(x_size*n_spectra, y_size), dpi=dpi)
-    if type(axes) != np.array:
+    if type(axes) != np.ndarray:
         axes = [axes]
 
     # plot each individual spectrum
