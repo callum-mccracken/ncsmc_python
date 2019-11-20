@@ -24,7 +24,7 @@ import numpy as np
 
 import utils
 
-filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr"
+filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/eigenphase_shift.agr"
 
 def flip_if_needed(last_nums, nums):
     """Compare every number in nums to every one in last_nums.
@@ -560,11 +560,8 @@ def start_from_zero(sections):
 
 
 def flip(read_filename):
-    """Performs flipping operation from start to finish"""
-    eigen = False
-    if "eigen" in read_filename:
-        eigen = True
-    
+    """Performs flipping operation from start to finish,
+     returns the filename of the flipped file"""
     print("Flipping...\r", end="")
     read_filename = utils.abs_path(read_filename)
     # read from original file

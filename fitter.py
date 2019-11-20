@@ -1,14 +1,19 @@
 """module for fitting functions to data interactively"""
 import csv
 import numpy as np
+import os
 from os.path import join
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, TextBox
 
-from utils import output_dir
+import utils
 
+# a few global variables to edit as we edit the graphs
+width = 0
+res_energy = 0
 
 def read_csv(filename):
+    """gives the x and y values contained in a channel csv file"""
     with open(filename, 'r') as f:
         reader = csv.reader(f)
         csv_values = np.array(list(reader), dtype=float)
@@ -17,12 +22,16 @@ def read_csv(filename):
     csv_values = csv_values.T
     if len(csv_values) != 2:
         raise ValueError("This function was only made for reading two columns!")
-    x, y = csv_values[:]
+    x, y = np.array(csv_values)[:]
     return x, y
 
 
 def fit_cubic(x, y):
-    """a fit of the form a + bx + cx^2 + dx^3"""
+    """a fit of the form y = a + bx + cx^2 + dx^3
+    
+    Returns cubic, a, b, c, d, where cubic is the function cubic(x)~y, 
+    and a, b, c, d are floats
+    """
     d, c, b, a = np.polyfit(x, y, 3)
     def cubic(x):
         return a + b * x + c * x ** 2 + d * x ** 3
@@ -30,6 +39,7 @@ def fit_cubic(x, y):
 
 
 def make_plot(x, y, title):
+    global res_energy, width
     """this function makes an interactive plot for finding resonances"""
 
     n_fit = 100  # how many points to draw when we plot the fit
@@ -54,9 +64,13 @@ def make_plot(x, y, title):
     l_slider = Slider(l_bound_box, 'Left (L/R keys)', min(x), max(x),
                       valinit=min(x), color=triumf_blue)
 
-    # create reset button
-    resetax = plt.axes((0.8, 0.01, 0.1, 0.04))
-    reset_button = Button(resetax, 'Reset', color=clear, hovercolor='0.975')
+    # reset button
+    reset_ax = plt.axes((0.7, 0.01, 0.1, 0.04))
+    reset_button = Button(reset_ax, 'Reset', color=clear, hovercolor=triumf_blue)
+    
+    # done button
+    done_ax = plt.axes((0.8, 0.01, 0.1, 0.04))
+    done_button = Button(done_ax, 'Done', color=clear, hovercolor=triumf_blue)
 
     # fit the cubic y = cubic(x)
     cubic, _, b, c, d = fit_cubic(x, y)
@@ -87,6 +101,7 @@ def make_plot(x, y, title):
 
     # function to redraw graph
     def update(val):
+        global res_energy, width
         left = l_slider.val
         right = r_slider.val
         
@@ -99,9 +114,9 @@ def make_plot(x, y, title):
         data_line.set_xdata(bounded_x)
         
         # make new fit with that data
-        new_cubic, _, new_b, new_c, new_d = fit_cubic(bounded_x, bounded_y)
+        cubic, _, b, c, d = fit_cubic(bounded_x, bounded_y)
         bounded_fit_x = np.linspace(min(bounded_x), max(bounded_x), num=n_fit)
-        bounded_fit_y = np.array([new_cubic(xi) for xi in bounded_fit_x])
+        bounded_fit_y = np.array([cubic(xi) for xi in bounded_fit_x])
 
         fit_line.set_ydata(bounded_fit_y)
         fit_line.set_xdata(bounded_fit_x)
@@ -110,12 +125,12 @@ def make_plot(x, y, title):
         ax.set_ylim(min(bounded_y), max(bounded_y)*1.1)
 
         # calculate values for text boxes
-        new_e_res = - new_c / (3 * new_d)
-        res_energy_text_box.set_val("{:2f}".format(new_e_res))
+        res_energy = - c / (3 * d)
+        res_energy_text_box.set_val("{:2f}".format(res_energy))
 
-        new_width = 2 / np.radians(
-            new_b + 2*new_c*new_e_res + 3*new_d*new_e_res**2)
-        width_text_box.set_val("{:2f}".format(new_width))
+        width = 2 / np.radians(
+            b + 2*c*res_energy + 3*d*res_energy**2)
+        width_text_box.set_val("{:2f}".format(width))
 
         points_text_box.set_val(str(len(bounded_x)))
 
@@ -129,6 +144,11 @@ def make_plot(x, y, title):
         l_slider.reset()
         r_slider.reset()
     reset_button.on_clicked(reset)
+
+    # function to exit graph when done
+    def close_plot(event):
+        plt.close()
+    done_button.on_clicked(close_plot)
 
     # function to make bars interactive with keyboard
     def key_event(event):
@@ -147,24 +167,49 @@ def make_plot(x, y, title):
     # finally, display the plot
     plt.show()
 
+    # return useful info once the plot is closed
+    return [width, res_energy]
+
 def find_resonance(csv_filename):
-    # get data from csv file
-    x, y = read_csv(join(output_dir, "CSVs", csv_filename))
+    """
+    Finds the energy at which a resonance occurs for given channel.
     
-    J2, parity, T2, _, _ = csv_filename[:-4].split("_")
+    Requires a csv file with a name of the form
+    
+    .../phase_1_-_3_column_4_Nmax_4.csv
+    
+    or
+
+    .../[word]_[2J]_[parity]_[2T]_column_[col]_Nmax_[Nmax].csv
+    """
+    # parse filename
+    filename = os.path.split(csv_filename)[-1]
+    filename = filename.replace(".csv", "")
+    # now filename = [word]_[2J]_[parity]_[2T]_column_[col]_Nmax_[Nmax]
+    _, J2, parity, T2, _, _, _, _ = filename.split("_")
+
+    # are J and T integers?
     J_int = int(J2) / 2 == int(int(J2) / 2)
     T_int = int(T2) / 2 == int(int(T2) / 2)
     
+    # strings for J and T, either in fraction or integer form
+    J = str(int(int(J2) / 2)) if J_int else "\\frac{{{}}}{{{}}}".format(J2, 2)
+    T = str(int(int(T2) / 2)) if T_int else "\\frac{{{}}}{{{}}}".format(T2, 2)
 
-    J = str(int(int(J2) / 2)) if J_int else "$\\frac{"+J2+"}{2}$"
-    T = str(int(int(T2) / 2)) if T_int else "$\\frac{"+T2+"}{2}$"
+    # get data from csv file
+    x, y = read_csv(csv_filename)
 
-    nice_title = "$J$: " + J + ", $\\pi$: " + parity + ", $T$: " + T
+    nice_title = "$J={},\\pi={},T={}$".format(J, parity, T)
 
-    make_plot(x, y, nice_title)
+    res_info = make_plot(x, y, nice_title)
+    return res_info
 
+def save_info(csv_path, titles, widths, energies):
+    file_string = "2J_parity_2T_column,width,energy\n"
+    energies = [str(e) for e in energies]
+    widths = [str(w) for w in widths]
+    for title, width, energy in zip(titles, widths, energies):
+        file_string += ",".join([title, width, energy]) + "\n"
+    with open(csv_path, "w+") as csv_file:
+        csv_file.write(file_string)
 
-
-
-if __name__ == "__main__":
-    find_resonance("2_-_2_column_2.csv")

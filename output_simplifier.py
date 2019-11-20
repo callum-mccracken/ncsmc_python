@@ -42,6 +42,7 @@ Parity = {parity}
 Details:
 {details}"""
 
+
 # a bunch of tiny functions for parsing data
 def j_parity_line(line):
     """
@@ -51,6 +52,8 @@ def j_parity_line(line):
     """
     regex = r"[ ]*2\*J=[ ]*[-]?[0-9]*[ ]*parity=[ ]*[-]?[0-9]*\n"
     return bool(re.match(regex, line))
+
+
 def get_j_parity(line):
     """assuming j_parity_line(line) == True, return J, parity"""
     # remove everything except necessary info
@@ -59,6 +62,8 @@ def get_j_parity(line):
     Jx2, parity = just_nums.split()
     J = int(Jx2)/2
     return J, parity
+
+
 def t_line(line):
     """
     checks if line is of the form 
@@ -67,11 +72,15 @@ def t_line(line):
     """ 
     regex = r"[ ]*2\*T=[ ]*[-]?[0-9]*\n"
     return bool(re.match(regex, line))
+
+
 def get_t(line):
     """assuming t_line(line) == True, return T"""
     Tx2 = line.replace("2*T=", "")
     T = int(Tx2)/2
     return T
+
+
 def bound_state_line(line):
     """
     checks if line is of the form 
@@ -79,14 +88,20 @@ def bound_state_line(line):
     Bound state found at E_b=[energy] [unit]
     """ 
     return "Bound state found at E_b=" in line
+
+
 def get_e(line):
     """assuming bound_state_line(line) == True, return E"""
     # remove the initial bit, as well as extra whitespace
     with_units = line.replace("Bound state found at E_b=", "").strip()
     E = with_units.split()[0]  # first "word" = E, second = units
     return float(E)
+
+
 def groud_e_line(line):
     return "Ground-state E=" in line
+
+
 def get_ground_e(line):
     """line looks like:
     Ground-state E= -68.4838  T_rel=   9.3033  [...]"""
@@ -95,8 +110,12 @@ def get_ground_e(line):
     # then after that, it'll be the first "word", strip whitespace too
     E = line.split()[0].strip()
     return float(E)
+
+
 def thresh_e_line(line):
     return "Threshold E=" in line
+
+
 def get_thresh_e(line):
     """line looks like:
      Threshold E= -69.0645 MeV"""
@@ -125,6 +144,9 @@ def simplify(filename):
 
     # parameters for each bound state
     E, J, T, parity, details = default, default, default, default, default
+    # lists to store E values and state titles, to return at the end
+    E_list = []
+    state_titles = []
 
     # this will hold strings describing states
     states = []
@@ -176,6 +198,8 @@ def simplify(filename):
                 # save state and move on to the next one
                 states.append(state_format.format(
                     E=E, J=J, T=T, parity=parity, details=details))
+                E_list.append(E)
+                state_titles.append("{}_{}_{}".format(J, parity, T))
                 # set some parameters back to default, but not all
                 # since some might be the same as for the next state
                 E, details = default, default
@@ -198,8 +222,11 @@ def simplify(filename):
         states=states)
     with open(filename+"_simplified", "w+") as out_file:
         out_file.write(file_str)
-    print("Done simplifying!")
+    E_string = ", ".join([str(E) for E in E_list])
+    print("Done simplifying! Found bound states at "+E_string)
     print("Output: "+filename+"_simplified")
+    return E_list, state_titles
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Output Simplifier")

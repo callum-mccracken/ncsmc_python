@@ -3,16 +3,14 @@
 import os
 
 # directory where we'll store info about resonances
-output_dir = os.path.join(os.path.dirname(__file__), "resonances")
+output_dir = os.path.join(os.path.dirname(__file__), "resonances_Nmax_{}")
 
 def abs_path(path):
     """return the absolute path to a file"""
     # first expand ~ for the user
-    path = os.path.expanduser(path)
     # then get rid of any ../ or ./ items
-    path = os.path.realpath(path)
-    # TODO: anything else we should do? Like deal with environment variables?
-    return path
+    return os.path.realpath(os.path.expanduser(path))
+
 
 def is_float(string):
     """checks if a string can be cast as a float"""
@@ -21,6 +19,7 @@ def is_float(string):
         return True
     except ValueError:
         return False
+
 
 def index_list(input_list):
     """returns indices for smallest to largest values in input_list,
@@ -58,6 +57,7 @@ def multi_strip(string, list_of_strs):
             string = string.replace(s, "")
     return string
 
+
 def make_nice_title(xmtitle):
     """makes nicer-looking titles than the ones provided in xmgrace files"""
     # we'll want a good title for plotting etc., so remove all gross bits
@@ -79,6 +79,74 @@ def make_nice_title(xmtitle):
     t2 = nice_title[parity_index+1:]
     nice_title = "_".join([j2, parity, t2])
     return nice_title
+
+
+def make_plot_title(nice_title):
+    """makes a plottable, LaTeX formatted title, for use in matplotlib graphs"""
+    hunks = nice_title.split("_")
+    J2, parity, T2, _, col = hunks
+
+    J = float(J2) / 2
+    if J == int(J):
+        J = str(J)
+    else:
+        J = "\\frac{{{}}}{{{}}}".format(J2, 2)
+    T = float(T2) / 2
+    if T == int(T):
+        T = str(T)
+    else:
+        T = "\\frac{{{}}}{{{}}}".format(T2, 2)
+    plot_title = "$J={}, \\pi={}, T={}$, column {}".format(
+        J, parity, T, col)
+    return plot_title
+
+
+def plot_title_2(title):
+    """title is of the form J_parity_T[_column]
+    
+    (the _column is optional)
+    """
+    # remove \n in case it exists
+    title = title.replace("\n", "")
+
+    hunks = title.split("_")
+    if len(hunks) == 3:
+        J, parity, T = hunks
+        if parity in ["+", "-", "?"]:
+            pass
+        elif parity in ["1", "-1", "+1"]:
+            parity = "+" if float(parity) == 1 else "-"
+        else:
+            raise ValueError("Invalid parity value '{}'".format(parity))
+        if J == "?":
+            pass
+        elif float(J) == int(float(J)):
+            pass
+        else:
+            J = "\\frac{{{}}}{{{}}}".format(int(2*float(J)), 2)
+        if T == "?":
+            pass
+        elif float(T) == int(float(T)):
+            pass
+        else:
+            T = "\\frac{{{}}}{{{}}}".format(int(2*float(T)), 2)
+    elif len(hunks) == 4:
+        J2, parity, T2, _ = hunks
+        J = float(J2) / 2
+        if J == int(J):
+            J = str(J)
+        else:
+            J = "\\frac{{{}}}{{{}}}".format(J2, 2)
+        T = float(T2) / 2
+        if T == int(T):
+            T = str(T)
+        else:
+            T = "\\frac{{{}}}{{{}}}".format(T2, 2)
+    else:
+        raise ValueError("Invalid title: {}".format(title))
+    plot_title = "${}^{} {}$".format(J, parity, T)
+    return plot_title
+
 
 def xmgrace_title(xmtitle, series_num):
     """Takes an xmgrace series title and edits the series number,
