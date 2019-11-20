@@ -34,9 +34,14 @@ bound_energies, bound_titles = output_simplifier.simplify(ncsmc_dot_out)
 phase_csv = resonance_info.get_resonance_info(phase_flipped, Nmax=Nmax, already_flipped=True)
 eigenphase_csv = resonance_info.get_resonance_info(eigenphase_flipped, Nmax=Nmax, already_flipped=True)
 
+
+
+
 # plot all channels, and make csvs for each individual channel too
-#resonance_plotter.plot(phase_flipped, flipped=True, Nmax=Nmax)
-#resonance_plotter.plot(eigenphase_flipped, flipped=True, Nmax=Nmax)
+resonance_plotter.plot(phase_flipped, flipped=True, Nmax=Nmax)
+resonance_plotter.plot(eigenphase_flipped, flipped=True, Nmax=Nmax)
+
+input()
 
 # then from here you have to look at the resonance images,
 # and figure out which ones are interesting.

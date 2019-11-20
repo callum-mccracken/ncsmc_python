@@ -115,7 +115,7 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
     # pick colors for each line
     colours = cmap(np.linspace(0, 1, n_lines))
 
-    # make main figures
+    # make main figure
     _, axes = plt.subplots(
         nrows=1, ncols=n_spectra, sharex=True, sharey=True,
         figsize=(x_size*n_spectra, y_size), dpi=dpi)
@@ -126,6 +126,10 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
     for ax, e, w, ct, mt in zip(axes, energies_list, widths_list,
                                 channel_title_list, main_title_list):
         plot_levels(e, w, ct, mt, ax=ax, y_label="", colors=colours)
+
+    # ensure the full graph is visible
+    plt.xlim(-1, n_lines+1)
+
 
     # put title only on the first one
     axes[0].set_ylabel("Energy ($MeV$)")
