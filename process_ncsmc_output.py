@@ -1,20 +1,20 @@
+"""a module to consolidate all functions into one process"""
 import flipper
 import output_simplifier
 import resonance_info
 import resonance_plotter
 import fitter
-#import pheno
 import scheme_plot
 import utils
 
 import os
 
 # name of needed files
-phase_shift = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/phase_shift.agr"
-eigenphase_shift = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/eigenphase_shift.agr"
-ncsmc_dot_out = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/ncsm_rgm_Am2_1_1.out"
-experiment = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/experiment_Li9.txt"
-Nmax = 4
+phase_shift = "/global/home/ccmccracken/scratch/Li8Li9/ncsmc/Nmax6/phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr"
+eigenphase_shift = "/global/home/ccmccracken/scratch/Li8Li9/ncsmc/Nmax6/eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr"
+ncsmc_dot_out = "/global/home/ccmccracken/scratch/Li8Li9/ncsmc/Nmax6/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6"
+experiment = "/global/home/ccmccracken/scratch/Li8Li9/ncsmc/experiment_Li9.txt"
+Nmax = 6
 
 # ensure files exist and are not empty
 for f in [phase_shift, eigenphase_shift, ncsmc_dot_out, experiment]:
@@ -56,18 +56,17 @@ input()
 
 # one line per \n please
 phase_channels = """1,-,3,4,possible
-3,-,3,2,none
 3,+,3,1,strong
+3,+,3,3,strong
 3,+,3,3,strong
 5,-,3,4,none
 5,+,3,4,strong
 """
 
-eigenphase_channels = """3,+,3,1,strong
-3,+,3,2,strong
-5,-,3,2,possible
-5,+,3,1,strong
-7,-,3,1,strong
+eigenphase_channels = """1,-,3,2,possible
+3,+,3,1,strong
+3,+,3,3,strong
+3,+,3,5,possible
 """
 
 # merge those lists
