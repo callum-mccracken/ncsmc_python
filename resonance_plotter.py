@@ -53,10 +53,10 @@ energy_bounds = (-inf, inf)
 res_types = "all"  # if you want to plot everything
 
 # resolution of png images, dots per inch
-dpi = 96
+dpi = 90
 
 def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
-         channels="", Nmax=None):
+         channels="", Nmax=None, dpi=dpi):
     """
     Makes a whole bunch of plots.
     - one for each of the user-specified channels
@@ -103,12 +103,11 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
     # energies: a list of energy values, possibly longer than some channels
     all_channels, energies = flipper.separate_into_channels(new_filename)
 
-    l_bound, r_bound = e_bounds
-
-    # The following if blocks contain a bunch of repeated logic,
-    # but I think it's better to have them separate, since if we merge them,
-    # we'd have to have if blocks every few lines to call plotting functions.
-    # This also means we can add new output types more easily (hopefully).
+    # if energy bounds are -inf, inf, let's set them to the min / max e values
+    if e_bounds == (-inf, inf):
+        l_bound, r_bound = min(energies), max(energies)
+    else:
+        l_bound, r_bound = e_bounds
 
     output_dir = utils.output_dir.format(Nmax)
     if not exists(output_dir):
@@ -156,7 +155,8 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
             # I'd let matplotlib autogenerate the graph limits,
             # but then you get graphs with a range of -1 to 1, which have
             # an interesting shape but are not large enough to be useful
-            channel_ax.set_ylim(-50, 180)
+            channel_ax.set_ylim(-50, 200)
+            channel_ax.set_xlim(l_bound, r_bound)
             channel_ax.set_xlabel("Energy (MeV)")
             channel_ax.plot(plot_energies, plot_phases)
             channel_path = join(png_dir, 
@@ -192,11 +192,13 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
             csv_paths.append(csv_path)
 
     # make main matplotlib plot
+    print("spooning out lots of spaghetti\r", end="")
     plt.cla()
     plt.clf()
     plt.title("Multi-Channel "+phase_word.title()+" Shifts")
     plt.ylabel("Phase (degrees)")
-    plt.ylim(-50, 180)
+    plt.ylim(-50, 200)
+    plt.xlim(l_bound, r_bound)
     plt.xlabel("Energy (MeV)")
     for energy, phase, title in to_plot:
         plt.plot(energy, phase, label=title)

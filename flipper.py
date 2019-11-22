@@ -26,22 +26,23 @@ import utils
 
 filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/eigenphase_shift.agr"
 
-def flip_if_needed(last_nums, nums):
-    """Compare every number in nums to every one in last_nums.
+def flip_if_needed(top_nums, btm_nums):
+    """Compare every number in top_nums to every one in btm_nums.
     If the difference is big, flip the number to make it small.
 
     By "flip", I mean add or subtract 180, as needed.
 
     Return the new list of nums, after being flipped if needed
     """
-    for i in range(len(last_nums)):  # there might be more new nums than old
-        num = nums[i]
-        last_num = last_nums[i]
-    
-        if abs(last_num - num) >= 50:
-            num = num + np.sign(last_num - num) * 180
-        nums[i] = num
-    return nums
+    # the threshold of "that's not real data, that's flipped"
+    # value = arbitrary, but if we set it too high it can be a problem
+    thresh=50
+
+    for i in range(len(top_nums)):  # there might be more new nums than old
+        diff = top_nums[i] - btm_nums[i]
+        if abs(diff) > thresh:
+            btm_nums[i] += np.sign(diff) * 180
+    return btm_nums
 
 
 def sanitize(filename):
@@ -162,8 +163,9 @@ def separate_into_megasections(sections):
             [1, 2]
         ]
     ]
+    When combining sections, also make sure that energy is monotonic
+    throughout a megasection!
     """
-
     # make mega_sections (combine sections of increasing size)
     mega_sections = []
     while len(sections) > 1: 
@@ -172,18 +174,19 @@ def separate_into_megasections(sections):
         # lines at the interface
         top_line = top_section[-1]
         bottom_line = bottom_section[0]
-        if len(top_line) > len(bottom_line):
+        length_change = len(top_line) > len(bottom_line)
+        energy_change = top_line[0] > bottom_line[0]
+        if length_change or energy_change:
             mega_sections.append(bottom_section)
             sections.pop()
         else:
             sections[-2] = top_section + bottom_section
             sections.pop()
-    
     if len(sections) == 1:
         mega_sections.append(sections[0])
     else:
         raise ValueError("How did this happen?")
-    
+
     return list(reversed(mega_sections))  # now it's top-to-bottom
 
 
@@ -204,6 +207,8 @@ def separate_into_channels(filename):
             titles.append(line)
 
     mega_sections = separate_into_megasections(sections)
+
+    
 
     # initialize channels dict
     channels = {}
@@ -227,7 +232,7 @@ def separate_into_channels(filename):
 
     # now make list to contain energy values
     energies = [line[0] for line in mega_sections[0]]
-    
+
     return channels, energies
 
 

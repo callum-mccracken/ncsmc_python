@@ -71,7 +71,7 @@ def plot_levels(energies, widths, channel_titles, main_title,
     max_y = max(energies) + factor * (max(energies)-min(energies))
     min_y = min(energies) - factor * (max(energies)-min(energies))
 
-    ax.set_ylim(min_y, max_y)
+    #ax.set_ylim(min_y, max_y)
 
     # plot each energy line with a bar around it depending on width
     for i, e in enumerate(e_list):
@@ -118,7 +118,7 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
 
     # make main figure
     _, axes = plt.subplots(
-        nrows=1, ncols=n_spectra, sharex=False, sharey=True,
+        nrows=1, ncols=n_spectra, sharex=True, sharey=True,
         figsize=(x_size*n_spectra, y_size), dpi=dpi)
     if type(axes) != np.ndarray:
         axes = [axes]
@@ -134,6 +134,6 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
 
     # put title only on the first one
     axes[0].set_ylabel("Energy ($MeV$)")
+    
     # then show the plot
     plt.show()
-

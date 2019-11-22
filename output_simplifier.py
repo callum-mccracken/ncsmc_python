@@ -125,13 +125,14 @@ def get_thresh_e(line):
     return float(E)
 
 
-def simplify(filename):
+def simplify(filename, verbose=False):
     """
     Makes a simpler version of ncsmc .out files,
     no more scrolling through 100000 line files!
     """
     filename = utils.abs_path(filename)
-    print("Simplifying "+filename)
+    if verbose:
+        print("Simplifying "+filename)
     # get all lines from the file, as a list of strings
     with open(filename, "r+") as file_to_simplify:
         lines = file_to_simplify.readlines()
@@ -222,9 +223,10 @@ def simplify(filename):
         states=states)
     with open(filename+"_simplified", "w+") as out_file:
         out_file.write(file_str)
-    E_string = ", ".join([str(E) for E in E_list])
-    print("Done simplifying! Found bound states at "+E_string)
-    print("Output: "+filename+"_simplified")
+    if verbose:
+        E_string = ", ".join([str(E) for E in E_list])
+        print("Done simplifying! Found bound states at "+E_string)
+        print("Output: "+filename+"_simplified")
     return E_list, state_titles
 
 

@@ -166,6 +166,9 @@ def make_plot(x, y, title):
 
     # finally, display the plot
     plt.show()
+    plt.close()
+    plt.cla()
+    plt.clf()
 
     # return useful info once the plot is closed
     return [width, res_energy]

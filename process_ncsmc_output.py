@@ -11,19 +11,24 @@ import os
 
 Nmax_list = [4, 6]
 # files in the same order as Nmax:
-phase_shift_list = [
-    "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/phase_shift_Nmax4.agr",
-    "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr"
+file_dir = "../"
+phase_shift_list = [os.path.join(file_dir, f) for f in [
+    "Nmax4/phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4.agr_edited",
+    "Nmax6/phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr_edited"]
 ]
-eigenphase_shift_list = [
-    "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/eigenphase_shift_Nmax4.agr",
-    "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr"
+eigenphase_shift_list = [os.path.join(file_dir, f) for f in [
+    "Nmax4/eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4.agr_edited",
+    "Nmax6/eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr_edited"]
 ]
-ncsmc_dot_out_list = [
-    "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/ncsm_rgm_Am2_1_1_Nmax4.out",
-    "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6"
+ncsmc_dot_out_list = [os.path.join(file_dir, f) for f in [
+    "Nmax4/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4_old",
+    "Nmax6/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6_old"]
 ]
-experiment = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/ncsmc_output/experiment_Li9.txt"
+experiment = os.path.join(file_dir, "experiment_Li9.txt")
+
+for f in phase_shift_list+eigenphase_shift_list+ncsmc_dot_out_list+[experiment]:
+    if not os.path.exists(f):
+        raise OSError("file {} does not exist!".format(f))
 
 overall_energies = []
 overall_widths = []
@@ -46,12 +51,6 @@ def initial_plots(Nmax, phase_shift, eigenphase_shift, ncsmc_dot_out):
     # make simplified output file, and return energies of bound states
     bound_energies, bound_titles = output_simplifier.simplify(ncsmc_dot_out)
 
-    # get info about all resonances in the files, save images, ...
-    resonance_info.get_resonance_info(
-        phase_flipped, Nmax=Nmax, already_flipped=True)
-    resonance_info.get_resonance_info(
-        eigenphase_flipped, Nmax=Nmax, already_flipped=True)
-
     # plot all channels, and make csvs for each individual channel too
     resonance_plotter.plot(phase_flipped, flipped=True, Nmax=Nmax)
     resonance_plotter.plot(eigenphase_flipped, flipped=True, Nmax=Nmax)
@@ -62,8 +61,12 @@ def initial_plots(Nmax, phase_shift, eigenphase_shift, ncsmc_dot_out):
 
 def select_interesting_channels(Nmax, bound_energies,
                                 bound_titles, eigenphase_flipped):
-    interesting_channel_file = "resonances_Nmax_{}/interesting.txt".format(Nmax)
-    if not os.path.exists(interesting_channel_file):
+    interesting_file = "resonances_Nmax_{}/interesting.txt".format(Nmax)
+    exists = os.path.exists(interesting_file)
+    blank = True if not exists else os.path.getsize(interesting_file) == 0
+    must_write = (not exists) or blank
+
+    if must_write:
         # here you have to look at the resonance images,
         # and figure out which ones are interesting.
 
@@ -73,9 +76,10 @@ def select_interesting_channels(Nmax, bound_energies,
         # When you find those, write down their corresponding lines
         # from the resonances.csv file.
 
-        print("enter all interesting channels in", interesting_channel_file)
+        print("Enter all interesting channels in", interesting_file)
         help_str = """
-        When you're done, the file should look something like this:
+        When you're done, the file should look
+        something like this:
 
         Eigenphase
         3,+,3,1,strong
@@ -92,10 +96,10 @@ def select_interesting_channels(Nmax, bound_energies,
 
         """
         print(help_str)
-        open(interesting_channel_file, "a+").close()
+        open(interesting_file, "a+").close()
         input("Hit enter once you've had enough time to enter the right lines: ")
 
-    with open(interesting_channel_file, "r+") as ch_file:
+    with open(interesting_file, "r+") as ch_file:
         lines = ch_file.readlines()
 
     # remove blanks
@@ -105,7 +109,6 @@ def select_interesting_channels(Nmax, bound_energies,
 
     mode = ""  # "p" for phase, "e" for eigenphase
     for line in lines:
-        print(line)
         if "Eigenphase" in line:
             mode = "e"
         elif "Phase" in line:
@@ -125,12 +128,13 @@ def select_interesting_channels(Nmax, bound_energies,
     return all_channels, channel_titles
 
 
-def add_resonances(Nmax, eigenphase_flipped, all_channels, channel_titles, bound_energies, bound_titles):
+def add_resonances(Nmax, eigenphase_flipped, all_channels, channel_titles,
+                   bound_energies, bound_titles):
     # now use eigenphase file to find details about resonances
 
-    # now re-plot the interesting ones / make a spaghetti plot with all those
-    eigenphase_csvs = resonance_plotter.plot(
-        eigenphase_flipped, flipped=True, Nmax=Nmax, channels=all_channels)
+    # plot interesting resonances / spaghetti plot with only those, in high-res
+    eigenphase_csvs = resonance_plotter.plot(eigenphase_flipped,
+        flipped=True, Nmax=Nmax, channels=all_channels, dpi=900)
 
     # path to save channel info
     eigenphase_info_path = os.path.join(utils.output_dir.format(Nmax), "eigenphase_info.csv")
@@ -173,13 +177,17 @@ def add_resonances(Nmax, eigenphase_flipped, all_channels, channel_titles, bound
 def add_nmax_data(Nmax_list):
     for i, Nmax in enumerate(Nmax_list):
         print("working on Nmax =", Nmax)
+        # get ncsmc output files
         ps = phase_shift_list[i]
         es = eigenphase_shift_list[i]
         dot_out = ncsmc_dot_out_list[i]
+        # get bound state info and flipped ephase file name
         bound_energies, bound_titles, eigenphase_flipped = initial_plots(
             Nmax, ps, es, dot_out)
+        # select interesting channels, i.e. those with resonances
         all_channels, channel_titles = select_interesting_channels(
             Nmax, bound_energies, bound_titles, eigenphase_flipped)
+        # stick those channels in the overall plot
         add_resonances(Nmax, eigenphase_flipped, all_channels, channel_titles,
                     bound_energies, bound_titles)
 
@@ -215,6 +223,7 @@ def get_experimental():
     overall_widths.append(expt_widths)
     overall_channels.append(expt_channels)
     overall_titles.append("Experiment")
+    print("got experimental data")
 
 add_nmax_data(Nmax_list)
 get_experimental()
