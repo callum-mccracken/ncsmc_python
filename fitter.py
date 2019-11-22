@@ -148,6 +148,8 @@ def make_plot(x, y, title):
     # function to exit graph when done
     def close_plot(event):
         plt.close()
+        plt.cla()
+        plt.clf()
     done_button.on_clicked(close_plot)
 
     # function to make bars interactive with keyboard
