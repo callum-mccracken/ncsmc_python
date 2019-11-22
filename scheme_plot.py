@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
+import os
 import utils
 
 # general plot formatting
@@ -11,6 +11,8 @@ plt.style.use('seaborn-white')
 cmap = plt.get_cmap('viridis')
 
 dpi=96
+dpi_high_res=900
+
 # dimensions of spectrum plots
 x_size = 5
 y_size = 10
@@ -140,4 +142,8 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
     
     # then show the plot
     #plt.show()
-    plt.savefig("level_scheme.png")
+    if not os.path.exists("level_schemes"):
+        os.mkdir("level_schemes")
+    fig_path = os.path.join("level_schemes", "level_scheme.png")
+    plt.savefig(fig_path, dpi=dpi_high_res)
+    print("Saved level scheme plot as", fig_path)

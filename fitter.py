@@ -175,6 +175,7 @@ def make_plot(x, y, title):
     # return useful info once the plot is closed
     return [width, res_energy]
 
+
 def find_resonance(csv_filename):
     """
     Finds the energy at which a resonance occurs for given channel.

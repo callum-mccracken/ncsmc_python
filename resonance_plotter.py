@@ -192,7 +192,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
             csv_paths.append(csv_path)
 
     # make main matplotlib plot
-    print("spooning out lots of spaghetti\r", end="")
+    print("it is time to eat your spaghetti\r", end="")
     plt.cla()
     plt.clf()
     plt.title("Multi-Channel "+phase_word.title()+" Shifts")
