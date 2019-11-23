@@ -144,6 +144,7 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
     #plt.show()
     if not os.path.exists("level_schemes"):
         os.mkdir("level_schemes")
-    fig_path = os.path.join("level_schemes", "level_scheme.png")
-    plt.savefig(fig_path, dpi=dpi_high_res)
-    print("Saved level scheme plot as", fig_path)
+    fig_path = os.path.join("level_schemes", "level_scheme")
+    plt.savefig(fig_path+".png", dpi=dpi_high_res)
+    plt.savefig(fig_path+".eps")
+    print("Saved level scheme plot as", fig_path+".png and other extensions")
