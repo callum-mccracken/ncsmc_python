@@ -76,8 +76,8 @@ def plot_levels(energies, widths, channel_titles, main_title,
         top = energies[i] + widths[i]
         btm = energies[i] - widths[i]
         itll_fit = top < max_y and btm > min_y
-        if widths[i] == 0:  # bound state
-            ax.plot(x, e, marker='', color="green",
+        if energies[i] < 0:  # bound state
+            ax.plot(x, e, marker='', color="black",
                     linewidth=1, alpha=1, solid_capstyle="butt")
         elif itll_fit:  # typical resonance where the width bars will fit
             x_width = 0.9*linewidth_from_data_units(x_inc, ax, reference="x")
@@ -146,5 +146,5 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
         os.mkdir("level_schemes")
     fig_path = os.path.join("level_schemes", "level_scheme")
     plt.savefig(fig_path+".png", dpi=dpi_high_res)
-    plt.savefig(fig_path+".eps")
-    print("Saved level scheme plot as", fig_path+".png and other extensions")
+    #plt.savefig(fig_path+".eps")
+    print("Saved level scheme plot as", fig_path+".png")

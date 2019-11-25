@@ -564,10 +564,11 @@ def start_from_zero(sections):
     return separate_into_sections(list_of_lines)
 
 
-def flip(read_filename):
+def flip(read_filename, verbose=True):
     """Performs flipping operation from start to finish,
      returns the filename of the flipped file"""
-    print("Flipping...\r", end="")
+    if verbose:
+        print("Flipping...\r", end="")
     read_filename = utils.abs_path(read_filename)
     # read from original file
     text_lines, number_lines = sanitize(read_filename)
@@ -586,7 +587,8 @@ def flip(read_filename):
     # write to output file
     new_filename = write_data(sections, text_lines, read_filename)
 
-    print("Your data has been flipped! Output:", new_filename)
+    if verbose:
+        print("Your data has been flipped! Output:", new_filename)
     return new_filename
 
 

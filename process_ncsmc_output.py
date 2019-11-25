@@ -9,7 +9,7 @@ import utils
 
 import os
 
-# what resolution to use for final images
+# what resolution to use for final images (spaghetti + scheme plot)
 high_res_dpi = 900
 
 Nmax_list = [4, 6]
@@ -59,51 +59,36 @@ def select_interesting_channels(Nmax):
 
         print("Enter all interesting channels in", interesting_file)
         help_str = """
+        First, take a look at the phase_PNG files, to figure out which
+        channels are interesting (just look at the graph, if you see a swoop up)
+
+        Then, figure out which columns in the eigenphase file those match with.
+        (they should have the same J, pi, T, but may have a different column #)
+
+        Then, open up resonances_eigenphase_Nmax_[#].csv and copy the lines
+        associated with those channels.
+
         When you're done, the file should look
         something like this:
 
-        Eigenphase
         3,+,3,1,strong
         3,+,3,3,strong
-        3,+,3,3,strong
+        3,-,3,3,strong
         5,-,3,4,none
         5,+,3,4,strong
-        Phase
-        1,+,3,1,strong
-        2,+,3,3,possible
-        3,-,3,4,strong
-        5,-,3,4,none
-        5,+,3,4,strong
+
+        [lines copied from the eigenphase csv file, one blank line at the end]
 
         """
         print(help_str)
         open(interesting_file, "a+").close()
-        input("Hit enter once you've had enough time to enter the right lines: ")
+        input("Hit enter once you've had enough time to enter the right",
+              "lines. Don't forget to SAVE the file!")
 
     with open(interesting_file, "r+") as ch_file:
-        lines = ch_file.readlines()
+        channels_str = ch_file.read()
 
-    # remove blanks
-    lines = [l for l in lines if l != ""]
-    phase_channels = ""
-    eigenphase_channels = ""
-
-    mode = ""  # "p" for phase, "e" for eigenphase
-    for line in lines:
-        if "Eigenphase" in line:
-            mode = "e"
-        elif "Phase" in line:
-            mode = "p"
-        elif mode == "e":
-            eigenphase_channels += line
-        elif mode == "p":
-            phase_channels += line
-
-    # merge those lists
-    channels_str = "\n".join(set(
-        (eigenphase_channels + phase_channels).splitlines()))
-
-    # differently formatted version for later
+    # differently formatted version for use as titles
     channel_titles = [
         "_".join(line.split(",")[:-1]) for line in channels_str.splitlines()]
 
@@ -114,7 +99,7 @@ def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
                    bound_energies, bound_titles):
     """use eigenphase file to find details about resonances"""
 
-    # plot interesting resonances / spaghetti plot with only those, in high-res
+    # plot interesting resonances / spaghetti plot, in high-res
     eigenphase_csvs = resonance_plotter.plot(eigenphase_flipped,
         flipped=True, Nmax=Nmax, channels=channels_str, dpi=high_res_dpi)
 
@@ -161,19 +146,18 @@ def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
 def add_nmax_data(Nmax_list):
     for i, Nmax in enumerate(Nmax_list):
         print("working on Nmax =", Nmax)
-        # get ncsmc output files
+        # get ncsmc, .out output files
         ps = phase_shift_list[i]
         es = eigenphase_shift_list[i]
-        # flip them
-        ps = flipper.flip(ps)
-        es = flipper.flip(es)
-        # make plots
+        dot_out = ncsmc_dot_out_list[i]
+        # flip phase files
+        ps = flipper.flip(ps, verbose=False)
+        es = flipper.flip(es, verbose=False)
+        # make low-res plots
         resonance_plotter.plot(ps, flipped=True, Nmax=Nmax)
         resonance_plotter.plot(es, flipped=True, Nmax=Nmax)
 
-        # get output file which contains bound states
-        dot_out = ncsmc_dot_out_list[i]
-        # get bound state info and flipped ephase file name
+        # get bound state info
         bound_energies, bound_titles = output_simplifier.simplify(dot_out)
 
         # select interesting channels, i.e. those with resonances
