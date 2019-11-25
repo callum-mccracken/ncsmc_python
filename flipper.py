@@ -34,9 +34,9 @@ def flip_if_needed(top_nums, btm_nums):
 
     Return the new list of nums, after being flipped if needed
     """
-    # the threshold of "that's not real data, that's flipped"
+    # the threshold of "that difference is not real data, that's flipped"
     # value = arbitrary, but if we set it too high it can be a problem
-    thresh=50
+    thresh=90
 
     for i in range(len(top_nums)):  # there might be more new nums than old
         diff = top_nums[i] - btm_nums[i]
