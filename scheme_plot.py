@@ -146,5 +146,5 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
         os.mkdir("level_schemes")
     fig_path = os.path.join("level_schemes", "level_scheme")
     plt.savefig(fig_path+".png", dpi=dpi_high_res)
-    plt.savefig(fig_path+".eps")
+    plt.savefig(fig_path+".svg")
     print("Saved level scheme plot as", fig_path+".png")
