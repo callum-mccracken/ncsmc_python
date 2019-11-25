@@ -57,50 +57,60 @@ def plot_levels(energies, widths, channel_titles, main_title,
               fontsize=12, fontweight=2, color='black')
     ax.set_xlabel("")
     ax.set_ylabel(y_label)
-    #ax.set_xticks([])
+    ax.set_xticks([])
 
     x = np.linspace(min_x, max_x, num=len(energies), endpoint=True).tolist()
-    x_inc = abs(x[1] - x[0])
+    x_inc = x[1] - x[0]
+
     # format energies for plotting
     e_titles = ["{}".format(e) for e in energies]
-    e_list = [[e]*(len(x)) for e in energies]
 
-    # make an initial skinny plot for each energy value
-    for i, e in enumerate(e_list):
-        ax.plot(x, e, marker='', color='k', linewidth=1, alpha=1,
+    
+    # plot each energy line with a bar around it depending on width
+    # also add titles for energy, state label, width
+    for i in range(len(energies)):
+        # make an initial skinny plot for each energy value
+        ax.plot(x, [energies[i]]*len(x),
+                marker='', color='k', linewidth=1, alpha=1,
                 solid_capstyle="butt")
 
-    # plot each energy line with a bar around it depending on width
-    for i, e in enumerate(e_list[:-1]):
         # figure out if this energy's width will fit on the plot
         top = energies[i] + widths[i]
         btm = energies[i] - widths[i]
         itll_fit = top < max_y and btm > min_y
+        
+        # x value of the middle of this point
+        x_mid = x[i] + x_inc / 2
+
         if energies[i] < 0:  # bound state
-            ax.plot(x, e, marker='', color="black",
+            ax.plot(x, [energies[i]]*len(x), marker='', color="black",
                     linewidth=1, alpha=1, solid_capstyle="butt")
         elif itll_fit:  # typical resonance where the width bars will fit
             x_width = 0.9*linewidth_from_data_units(x_inc, ax, reference="x")
-            x_mid = (x[i] + x[i+1]) / 2
             ax.plot([x_mid, x_mid], [top, btm], marker='', color=colors[i],
                     linewidth=x_width, alpha=0.7, solid_capstyle='butt')
-            ax.plot([x_mid-x_inc/2, x_mid+x_inc/2], [e[i], e[i]],
-                    "--", marker='', color='cyan',
-                    linewidth=1, alpha=1, solid_capstyle='butt')
+            #ax.plot([x_mid-x_inc/2, x_mid+x_inc/2], [energies[i], energies[i]],
+            #        "--", marker='', color='cyan',
+            #        linewidth=1, alpha=1, solid_capstyle='butt')
         else:  # if width is too huge to put on the plot, make it a red line
-            ax.plot(x, e, marker='', color="red",
+            ax.plot(x, [energies[i]]*len(x), marker='', color="red",
                     linewidth=5, alpha=0.5, solid_capstyle='butt')
-
-    for i, e_title in enumerate(e_titles):
-        # annotate each line with energy value
-        ax.text(-0.5, energies[i], "{:.2f}".format(float(e_title)),
+        # energy value title
+        ax.text(-0.5, energies[i], "{:.2f}".format(float(e_titles[i])),
                  horizontalalignment='center', size='small', color='black',
                  verticalalignment='center')
-        # annotate each line with state info (J, pi, T, in the form J^p T)
+        # state info (J, pi, T, in the form J^p T) title
         plot_title = utils.plot_title_2(channel_titles[i])
         ax.text(10.5, energies[i], plot_title,
                  horizontalalignment='center', size='small', color='black',
                  verticalalignment='center')
+        # width title
+        if widths[i] != 0:
+            ax.text(x_mid, energies[i], "{:.2f}".format(float(widths[i])),
+                    horizontalalignment='center', size='small', color='cyan',
+                    verticalalignment='center')
+
+
 
 
 def plot_multi_levels(energies_list, widths_list, channel_title_list,
