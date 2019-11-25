@@ -1,4 +1,15 @@
-"""renames files created by ncsmc"""
+"""
+#Rename Post NCSMC
+
+Module for renaming files created by NCSMC.
+
+You can add a line to the end of your NCSMC batch script to call this, e.g.
+
+python /path/to/rename_post_ncsmc.py --projectile=$projectile
+--target=$target --potential=$potential --freq=$freq --Nmax=$Nmax
+--affix=$affix
+"""
+
 import os
 import argparse
 
@@ -37,7 +48,8 @@ def rename_all(projectile=projectile, target=target, potential=potential,
 
         e.g. phase_shift.agr --> phase_shift_nLi8_n3lo-srg2.0_20_Nmax11.agr
 
-        (prefix = "phase_shift", suffix = ".agr", but suffix !always= extension)
+        (e.g. prefix = "phase_shift", suffix = ".agr",
+        but note that "suffix" is not always equal to "extension")
 
         The stuff that gets added in the middle is defined as 'details' above.
         """
@@ -99,7 +111,7 @@ if __name__ == "__main__":
     parser.add_argument("--affix", nargs='?', const=affix,
                         help="extra text to affix to filenames", type=str)
 
-    # get args in dict form
+    # get args in dictionary form
     args = vars(parser.parse_args())
 
     # then run the renaming function with those variables

@@ -1,6 +1,5 @@
 """
-
-Output Simplifier
+#Output Simplifier
 
 Takes ncsmc output (.out) files, grabs info about bound states,
 and outputs a ".out_simplified" file in the same spot as the original.
@@ -18,7 +17,7 @@ import utils
 
 # enter a filename here,
 # or run this with "python output_simplifier.py -f [file]"
-filename = "/global/scratch/ccmccracken/Li8Li9/ncsmc/Nmax6/ncsm_rgm_Am2_1_1.out"
+filename = "/path/to/ncsm_rgm_Am2_1_1.out"
 
 # edit these two if you want to change the format of the output
 file_format = """Simplified View of {filename}:
@@ -46,8 +45,8 @@ Details:
 # a bunch of tiny functions for parsing data
 def j_parity_line(line):
     """
-    checks if line is of the form 
-    
+    checks if line is of the form
+
     2*J=  6    parity=-1
     """
     regex = r"[ ]*2\*J=[ ]*[-]?[0-9]*[ ]*parity=[ ]*[-]?[0-9]*\n"
@@ -66,10 +65,10 @@ def get_j_parity(line):
 
 def t_line(line):
     """
-    checks if line is of the form 
-    
+    checks if line is of the form
+
     2*T= 0
-    """ 
+    """
     regex = r"[ ]*2\*T=[ ]*[-]?[0-9]*\n"
     return bool(re.match(regex, line))
 
@@ -83,10 +82,10 @@ def get_t(line):
 
 def bound_state_line(line):
     """
-    checks if line is of the form 
-    
+    checks if line is of the form
+
     Bound state found at E_b=[energy] [unit]
-    """ 
+    """
     return "Bound state found at E_b=" in line
 
 
@@ -183,7 +182,7 @@ def simplify(filename, verbose=False):
 
             elif bound_state_line(line):
                 E = get_e(line)
-                step = "looking for details" 
+                step = "looking for details"
 
         # get the first detail line
         elif step == "looking for details":

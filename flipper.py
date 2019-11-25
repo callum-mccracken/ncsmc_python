@@ -1,4 +1,6 @@
 """
+#Flipper
+
 Contains a whole bunch of functions which...
 
 - read ncsmc phase shift output files
@@ -9,12 +11,14 @@ Contains a whole bunch of functions which...
   (e.g. -89.8, -89.9, 89.9)
 
 - reorder columns so that they are consistent as one scrolls down
+  - (This was deprecated, but the functions still
+     exist in case you want to use them later)
 
 - allow you to pick out individual channels
 
 This module can be run with
 
-python flipper.py -f /path/to/some/file (assumes file is not flipped)
+python flipper.py -f /path/to/some/file (assumes file is not already flipped)
 
 (output is saved in the same spot as the input, with _flipped at the end)
 """
@@ -24,7 +28,8 @@ import numpy as np
 
 import utils
 
-filepath = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/eigenphase_shift.agr"
+filepath = "/path/to/eigenphase_shift.agr"
+
 
 def flip_if_needed(top_nums, btm_nums):
     """Compare every number in top_nums to every one in btm_nums.
@@ -36,7 +41,7 @@ def flip_if_needed(top_nums, btm_nums):
     """
     # the threshold of "that difference is not real data, that's flipped"
     # value = arbitrary, but if we set it too high it can be a problem
-    thresh=90
+    thresh = 90
 
     for i in range(len(top_nums)):  # there might be more new nums than old
         diff = top_nums[i] - btm_nums[i]
@@ -49,7 +54,7 @@ def sanitize(filename):
     """
     Opens NCSMC output file, reads each line, separates into text lines and
     number lines. Sets NaN values to zero.
-    
+
     Returns lists:
     - one for title lines, contains strings
     - one for number lines, each entry is a sub-list of floats
@@ -76,11 +81,11 @@ def sanitize(filename):
 
 def separate_into_sections(list_of_nums):
     """returns sections of the file based on line length
-    
+
     e.g. if your file looks like
     [
         [1, 2],
-        [1, 2], 
+        [1, 2],
         [1, 2, 3, 4],
         [1, 2, 3, 4]
     ]
@@ -101,7 +106,7 @@ def separate_into_sections(list_of_nums):
     I do realize some sections might have the same lengths, one after the other
     (especially at the interface between megasections) and that is dealt with.
     """
-    # list_of_nums is a list of lists of numbers, 
+    # list_of_nums is a list of lists of numbers,
     # from the file but not formatted as strings anymore
     sections = []
     section = []
@@ -127,7 +132,7 @@ def separate_into_sections(list_of_nums):
         top = section[0]
         bottom = section[-1]
         if not (len(top) == len(bottom)):
-            raise ValueError("Why does section have lines of different length?")
+            raise ValueError("Why does section have different length lines?")
 
     return sections
 
@@ -168,7 +173,7 @@ def separate_into_megasections(sections):
     """
     # make mega_sections (combine sections of increasing size)
     mega_sections = []
-    while len(sections) > 1: 
+    while len(sections) > 1:
         top_section = sections[-2]
         bottom_section = sections[-1]
         # lines at the interface
@@ -194,7 +199,7 @@ def separate_into_channels(filename):
     """
     Returns channels (i.e. individual columns within megasections)
     as lists of floats, along with their associated labels (strings).
-    
+
     Also returns energies associated with each row. Note that not all
     channels have the same length as the energy list!
     """
@@ -208,8 +213,6 @@ def separate_into_channels(filename):
 
     mega_sections = separate_into_megasections(sections)
 
-    
-
     # initialize channels dict
     channels = {}
     for ms, ms_title in zip(mega_sections, titles):
@@ -217,15 +220,15 @@ def separate_into_channels(filename):
         max_cols = max(len(line) for line in ms)
 
         # note that we're ignoring energy columns here (the first columns)
-        
+
         channel_title_fmt = ms_title+" column {}"
         channel_titles = [
-            channel_title_fmt.format(i) for i in range(1, max_cols)]  
-        
+            channel_title_fmt.format(i) for i in range(1, max_cols)]
+
         for i in range(max_cols-1):
             channels[channel_titles[i]] = []
 
-        # get data for each channel        
+        # get data for each channel
         for line in ms:
             for i, num in enumerate(line[1:]):
                 channels[channel_titles[i]].append(num)
@@ -264,7 +267,7 @@ def write_data(sections, text_lines, filename):
     write_filename = filename+'_flipped'
     text_line_counter = 0
     tlc = text_line_counter
-    with open(write_filename, "w+") as write_file:        
+    with open(write_filename, "w+") as write_file:
         # start with a title
         write_file.write(text_lines[tlc])
         tlc += 1
@@ -278,7 +281,7 @@ def write_data(sections, text_lines, filename):
             # write title in the middle if needed
             if i != len(sections) - 1:
                 top_section = sections[i]
-                bottom_section = sections[i+1]    
+                bottom_section = sections[i+1]
                 # lines at the interface
                 top_line = top_section[-1]
                 bottom_line = bottom_section[0]
@@ -306,14 +309,14 @@ def dist(a, b):
 
 def get_column_map(top_line, bottom_line):
     """
-    get a dict of the form 
-    
+    get a dict of the form
+
     map ={
         0: index0,
         1: index1,
         ...
     }
-    
+
     so if you're wondering what column in the top line corresponds
     to which one in the bottom line, you can use this mapping.
 
@@ -325,7 +328,7 @@ def get_column_map(top_line, bottom_line):
     b = bottom line
     map = get_column_map(a, b)
     b = [b[map[i]] for i in range(len(b))]
-    
+
     and then b has the same column order as a.
     """
     # abbreviate so they're easier to type
@@ -390,7 +393,7 @@ def get_add_map(top_line, bottom_line):
     of flipped sections don't have big jumps due to fixing flipping issues.
 
     Same kind of idea as get_column_map()
-    """    
+    """
     # what to add to each column of bottom_line
     # to get it to match up with top_line "up to flips"
     add_map = {n: 0 for n in range(len(bottom_line))}  # start by assuming zero
@@ -421,11 +424,11 @@ def flip_columns(sections):
     the columns re-ordered so they're consistent throughout megasections.
     """
     big_flipped_sections = []
-    while len(sections) > 1:   
+    while len(sections) > 1:
         # get the bottom section and next lowest one
         # we go bottom up since then it combines in a nicer way
         top_section = sections[-2]
-        bottom_section = sections[-1]    
+        bottom_section = sections[-1]
         # lines at the interface
         top_line = top_section[-1]
         bottom_line = bottom_section[0]
@@ -452,8 +455,8 @@ def flip_columns(sections):
             for line in bottom_section:
                 new_bottom_section.append(apply_col_mapping(line, mapping))
 
-            # the new lowest section is the combination of bottom and 2nd-lowest
-            # but now they have the same order
+            # the new lowest section is the combination of
+            # bottom and 2nd-lowest, but now they have the same order
             sections[-2] = new_bottom_section
             sections.pop()  # remove last index
 
@@ -462,7 +465,7 @@ def flip_columns(sections):
         sections.pop()
     else:
         raise ValueError("How has this happened?")
-       
+
     assert sections == []
 
     # sections is just one section now
@@ -481,12 +484,12 @@ def flip_all_sections(sections):
     """
     # flip each section individially
     sections = [flip_one_section(section) for section in sections]
-    
+
     # now all we have to worry about is the interfaces
-    while len(sections) > 1:   
+    while len(sections) > 1:
         # get the bottom section and next lowest one
         top_section = sections[-2]
-        bottom_section = sections[-1]    
+        bottom_section = sections[-1]
         # lines at the interface
         top_line = top_section[-1]
         bottom_line = bottom_section[0]
@@ -510,12 +513,12 @@ def flip_all_sections(sections):
             new_bottom_section = top_section
             for line in bottom_section:
                 new_bottom_section.append(apply_add_mapping(line, mapping))
-            
+
         # the new lowest section is the combination of bottom and 2nd-lowest
         # but now they have the same order
         sections[-2] = new_bottom_section
         sections.pop()  # remove last index
-    
+
     # sections is just one section now
     # so re-separate into sections
     list_of_lines = sections[0]
@@ -523,7 +526,7 @@ def flip_all_sections(sections):
 
 
 def start_from_zero(sections):
-    """Ensure that all channels start at zero,
+    """Ensure that all channels start "from zero",
     or rather that they don't start at like 180 or -180 or something.
 
     Make them start from, say, 0.1, not 180.1"""
@@ -534,7 +537,8 @@ def start_from_zero(sections):
     for ms in mega_sections:
         num_cols = max(len(line) for line in ms)
 
-        # find how much we must add / subtract to each column (multiples of 180)
+        # find how much we must add / subtract to each column
+        # (multiples of 180)
         first_nums = [None for _ in range(num_cols)]
         to_add = [None for _ in range(num_cols)]
         for line in ms:
@@ -572,14 +576,11 @@ def flip(read_filename, verbose=True):
     read_filename = utils.abs_path(read_filename)
     # read from original file
     text_lines, number_lines = sanitize(read_filename)
-    
+
     # perform operations to get desired data
     sections = separate_into_sections(number_lines)
-    # only the eigenphase_shift files need columns rearranged
-    # actually apparently this issue has been solved!
-    # so we don't need to flip columns here either
-    #if eigen:
-    #    sections = flip_columns(sections)
+    # (apparently the column issue has been solved, no need to flip cols)
+    # sections = flip_columns(sections)
     sections = flip_all_sections(sections)
     # "start from zero" = make sections start within -180 --> 180
     sections = start_from_zero(sections)
@@ -602,4 +603,3 @@ if __name__ == "__main__":
     else:
         # if no -f flag is provided, do this.
         flip(filepath)
-

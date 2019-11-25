@@ -1,7 +1,9 @@
 """
-Contains function which looks through ncsmc data and figures out which channels
-have a resonance, which ones have a potential resonance, and which ones have no
-resonance. Writes data to a csv file.
+#Resonance Info
+
+Contains a function which looks through ncsmc data and figures out which
+channels have a resonance, which ones have a potential resonance,
+and which ones have no resonance. Writes data to a csv file.
 
 Can be run with
 
@@ -14,20 +16,22 @@ import argparse
 import flipper
 import utils
 
-filename = "/Users/callum/Desktop/rough_code/ncsmc_resonance_finder/to_be_flipped/big_eigenphase_shift.agr_flipped"
-flipped = True
+filename = "/path/to/eigenphase_shift.agr_flipped"
+flipped = True  # has the file at the path above been run through flipper.py?
+
 
 def get_resonance_info(filename, Nmax=None, already_flipped=False):
-    """Parses a ncsmc (eigen)phase shift file and writes info about each
-     channel to a .csv file, with information about whether or not there is a
-     resonance there. Returns name of said .csv file
-     
-     filename: path to phase shift file
+    """
+    Parses a ncsmc (eigen)phase shift file and writes info about each
+    channel to a .csv file, with information about whether or not there is a
+    resonance there. Returns name of said .csv file
 
-     Nmax: integer, max number of excitations allowed
+    filename: path to phase shift file
 
-     already_flipped: boolean, whether or not the file has already been
-                      "flipped" by flipper.py
+    Nmax: integer, max number of excitations allowed
+
+    already_flipped: boolean, whether or not the file has already been
+                     "flipped" by flipper.py
      """
     filename = utils.abs_path(filename)
     phase_word = "Eigenphase" if "eigen" in filename else "Phase"
@@ -42,11 +46,11 @@ def get_resonance_info(filename, Nmax=None, already_flipped=False):
         new_filename = flipper.flip(filename)
 
     print("Finding resonances...\r", end="")
-    
+
     # channels: dict, key = title, value = list with channel numbers
     channels, _ = flipper.separate_into_channels(new_filename)
 
-    # now look in each channel for a resonance 
+    # now look in each channel for a resonance
     resonance_info = {}
     for title, phases in channels.items():
         nice_title = utils.make_nice_title(title)
@@ -58,7 +62,7 @@ def get_resonance_info(filename, Nmax=None, already_flipped=False):
             resonance = True
             res_type = "strong"
         elif max_difference > 60:
-           res_type = "possible"
+            res_type = "possible"
         else:
             res_type = "none"
 
@@ -76,12 +80,13 @@ def get_resonance_info(filename, Nmax=None, already_flipped=False):
     res_file_name = join(output_dir, res_file_title)
     with open(res_file_name, "w+") as res_file:
         res_file.write("2J,parity,2T,column_number,resonance_type\n")
-        for title, res_type in resonance_info.items():            
+        for title, res_type in resonance_info.items():
             Jx2, parity, Tx2, _, column_number = title.split("_")
             write_list = [Jx2, parity, Tx2, column_number, res_type]
             res_file.write(",".join(write_list) + "\n")
     print("Analyzed all channels, saved CSV with info to", res_file_name)
     return res_file_name
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Resonance Info")

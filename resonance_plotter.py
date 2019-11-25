@@ -1,8 +1,7 @@
 """
 Contains a function for making plots related to ncsmc output.
 
-"matplotlib" (saves as png), and "xmgrace" output types are currently supported,
-makes both by default.
+Makes both matplotlib (png and svg) and xmgrace plots
 
 Can be run with
 
@@ -26,7 +25,7 @@ import flipper
 from resonance_info import get_resonance_info
 
 # File path (relative paths are okay)
-filepath = "/global/scratch/ccmccracken/Li8Li9/ncsmc/Nmax4/phase_shift.agr_flipped"
+filepath = "/path/to/phase_shift.agr_flipped"
 
 # value of Nmax, for file naming purposes
 Nmax = 4
@@ -49,11 +48,12 @@ channels_to_plot = """
 energy_bounds = (-inf, inf)
 
 # types of resonances to plot. Possible values: "strong", "possible", "none"
-#res_types = ["strong"]  # if you just want "strong" resonances
+# res_types = ["strong"]  # if you just want "strong" resonances
 res_types = "all"  # if you want to plot everything
 
 # resolution of png images, dots per inch
 dpi = 90
+
 
 def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
          channels="", Nmax=None, dpi=dpi):
@@ -95,7 +95,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
             continue
         Jx2, parity, Tx2, col_num, res_type = line.split(",")
         # only take the types of resonances we want to plot
-        if res_type in res_types:  
+        if res_type in res_types:
             title = "_".join([Jx2, parity, Tx2, "column", col_num])
             input_titles.append(title)
 
@@ -159,7 +159,8 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
             channel_ax.set_xlim(l_bound, r_bound)
             channel_ax.set_xlabel("Energy (MeV)")
             channel_ax.plot(plot_energies, plot_phases)
-            channel_path = join(png_dir, 
+            channel_path = join(
+                png_dir,
                 phase_word+"_"+nice_title+"_Nmax_"+str(Nmax)+".png")
             channel_fig.savefig(channel_path, dpi=dpi)
             plt.close(channel_fig)
@@ -178,13 +179,15 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
             lines = channel_string.splitlines()
             lines[0] = utils.xmgrace_title(lines[0], 0)
             channel_string = "\n".join(lines)
-            grdt_name = join(grace_dir,
+            grdt_name = join(
+                grace_dir,
                 phase_word+"_"+nice_title+"_Nmax_"+str(Nmax)+".grdt")
             with open(grdt_name, "w+") as channel_file:
                 channel_file.write(channel_string)
 
             # make csv file for channel too
-            csv_path = join(csv_dir,
+            csv_path = join(
+                csv_dir,
                 phase_word+"_"+nice_title+"_Nmax_"+str(Nmax)+".csv")
             with open(csv_path, "w+") as csv_file:
                 for e, p in zip(plot_energies, plot_phases):
@@ -202,14 +205,17 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
     plt.xlabel("Energy (MeV)")
     for energy, phase, title in to_plot:
         plt.plot(energy, phase, label=title)
-    main_mpl_path = join(png_dir,
+    main_mpl_path = join(
+        png_dir,
         phase_word+"_Nmax_"+str(Nmax)+"_"+file_suffix+".png")
     plt.legend(loc='lower right', shadow=False, fontsize='xx-small')
     plt.savefig(main_mpl_path, dpi=dpi)
+    plt.savefig(main_mpl_path.replace(".png", ".svg"))
     plt.close()
 
     # make main xmgrace file
-    main_grdt_path = join(grace_dir,
+    main_grdt_path = join(
+        grace_dir,
         phase_word+"_plot_Nmax_"+str(Nmax)+"_"+file_suffix+".grdt")
     with open(main_grdt_path, "w+") as grace_file:
         grace_file.write(main_xmgrace_string)
@@ -220,6 +226,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
 
     # return paths to csv files of channels we plotted
     return csv_paths
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Resonance Plotter")

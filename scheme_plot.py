@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import os
 import utils
 
@@ -10,8 +9,8 @@ plt.style.use('seaborn-white')
 # we'll pick colours from this colormap
 cmap = plt.get_cmap('viridis')
 
-dpi=96
-dpi_high_res=900
+dpi = 96
+dpi_high_res = 900
 
 # dimensions of spectrum plots
 x_size = 5
@@ -21,12 +20,13 @@ y_size = 10
 min_x = 0
 max_x = 10
 
+
 def linewidth_from_data_units(linewidth, axis, reference='y'):
     """
     Convert a linewidth in data units to linewidth in points.
-
+    (many thanks to stack exchange!)
     """
-    #Thanks! https://stackoverflow.com/questions/19394505/matplotlib-expand-the-line-with-specified-width-in-data-unit
+
     fig = axis.get_figure()
     if reference == 'x':
         length = fig.bbox_inches.width * axis.get_position().width
@@ -53,8 +53,9 @@ def plot_levels(energies, widths, channel_titles, main_title,
         colors = cmap(np.linspace(0, 1, len(energies)))
 
     # Add titles
-    ax.set_title("{}".format(main_title), loc='center',
-              fontsize=12, fontweight=2, color='black')
+    ax.set_title(
+        "{}".format(main_title), loc='center',
+        fontsize=12, fontweight=2, color='black')
     ax.set_xlabel("")
     ax.set_ylabel(y_label)
     ax.set_xticks([])
@@ -65,7 +66,6 @@ def plot_levels(energies, widths, channel_titles, main_title,
     # format energies for plotting
     e_titles = ["{}".format(e) for e in energies]
 
-    
     # plot each energy line with a bar around it depending on width
     # also add titles for energy, state label, width
     for i in range(len(energies)):
@@ -78,7 +78,7 @@ def plot_levels(energies, widths, channel_titles, main_title,
         top = energies[i] + widths[i]
         btm = energies[i] - widths[i]
         itll_fit = top < max_y and btm > min_y
-        
+
         # x value of the middle of this point
         x_mid = x[i] + x_inc / 2
 
@@ -89,28 +89,23 @@ def plot_levels(energies, widths, channel_titles, main_title,
             x_width = 0.9*linewidth_from_data_units(x_inc, ax, reference="x")
             ax.plot([x_mid, x_mid], [top, btm], marker='', color=colors[i],
                     linewidth=x_width, alpha=0.7, solid_capstyle='butt')
-            #ax.plot([x_mid-x_inc/2, x_mid+x_inc/2], [energies[i], energies[i]],
-            #        "--", marker='', color='cyan',
-            #        linewidth=1, alpha=1, solid_capstyle='butt')
         else:  # if width is too huge to put on the plot, make it a red line
             ax.plot(x, [energies[i]]*len(x), marker='', color="red",
                     linewidth=5, alpha=0.5, solid_capstyle='butt')
         # energy value title
         ax.text(-0.5, energies[i], "{:.2f}".format(float(e_titles[i])),
-                 horizontalalignment='center', size='small', color='black',
-                 verticalalignment='center')
+                horizontalalignment='center', size='small', color='black',
+                verticalalignment='center')
         # state info (J, pi, T, in the form J^p T) title
         plot_title = utils.plot_title_2(channel_titles[i])
         ax.text(10.5, energies[i], plot_title,
-                 horizontalalignment='center', size='small', color='black',
-                 verticalalignment='center')
+                horizontalalignment='center', size='small', color='black',
+                verticalalignment='center')
         # width title
         if widths[i] != 0:
             ax.text(x_mid, energies[i], "{:.2f}".format(float(widths[i])),
                     horizontalalignment='center', size='small', color='cyan',
                     verticalalignment='center')
-
-
 
 
 def plot_multi_levels(energies_list, widths_list, channel_title_list,
@@ -149,9 +144,8 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
 
     # put title only on the first one
     axes[0].set_ylabel("Energy ($MeV$)")
-    
-    # then show the plot
-    #plt.show()
+
+    # then save the plot
     if not os.path.exists("level_schemes"):
         os.mkdir("level_schemes")
     fig_path = os.path.join("level_schemes", "level_scheme")

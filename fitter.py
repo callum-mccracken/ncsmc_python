@@ -1,4 +1,6 @@
 """
+#Fitter
+
 Module for fitting cubics to resonances interactively.
 
 Creates GUI with interactive sliders to play with, to set left/right limits.

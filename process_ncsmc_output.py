@@ -1,7 +1,15 @@
-"""a module to consolidate all functions into one process"""
+"""
+#Process NCSMC Output
+
+a module to consolidate all functions in ncsmc_python, so you can just
+feed it the NCSMC output, and it gives you a bunch of useful stuff:
+
+- plots of all resonances
+- spaghetti plot with interesting resonances
+- level scheme plot
+"""
 import flipper
 import output_simplifier
-import resonance_info
 import resonance_plotter
 import fitter
 import scheme_plot
@@ -29,11 +37,12 @@ ncsmc_dot_out_list = [os.path.join(file_dir, f) for f in [
 ]
 experiment = os.path.join(file_dir, "experiment_Li9.txt")
 
-for f in phase_shift_list+eigenphase_shift_list+ncsmc_dot_out_list+[experiment]:
+files = phase_shift_list+eigenphase_shift_list+ncsmc_dot_out_list+[experiment]
+for f in files:
     if not os.path.exists(f):
         raise OSError("file {} does not exist!".format(f))
     if not os.path.getsize(f) > 0:
-            raise ValueError("file "+f+" is empty!")
+        raise ValueError("file "+f+" is empty!")
 
 overall_energies = []
 overall_widths = []
@@ -60,7 +69,9 @@ def select_interesting_channels(Nmax):
         print("Enter all interesting channels in", interesting_file)
         help_str = """
         First, take a look at the phase_PNG files, to figure out which
-        channels are interesting (just look at the graph, if you see a swoop up)
+        channels are interesting
+
+        (just look at the graph, if you see a swoop up, it's interesting)
 
         Then, figure out which columns in the eigenphase file those match with.
         (they should have the same J, pi, T, but may have a different column #)
@@ -100,8 +111,9 @@ def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
     """use eigenphase file to find details about resonances"""
 
     # plot interesting resonances / spaghetti plot, in high-res
-    eigenphase_csvs = resonance_plotter.plot(eigenphase_flipped,
-        flipped=True, Nmax=Nmax, channels=channels_str, dpi=high_res_dpi)
+    eigenphase_csvs = resonance_plotter.plot(
+        eigenphase_flipped, flipped=True, Nmax=Nmax,
+        channels=channels_str, dpi=high_res_dpi)
 
     # save channel info if needed
     eigenphase_info_path = os.path.join(
@@ -164,7 +176,7 @@ def add_nmax_data(Nmax_list):
         channels_str, channel_titles = select_interesting_channels(Nmax)
         # stick those channels in the overall plot
         add_resonances(Nmax, es, channels_str, channel_titles,
-                    bound_energies, bound_titles)
+                       bound_energies, bound_titles)
 
 
 def get_experimental():
@@ -181,13 +193,13 @@ def get_experimental():
 
     expt_energies = []
     expt_widths = []
-    expt_channels =  []
+    expt_channels = []
     for line in expt_lines:
         try:
             energy, width, J, parity, T = line.split(",")
         except ValueError:
-            # if parsing fails, no big deal, that's expected for non-data lines in
-            # the file, i.e. the preamble before the e,w,j,p,t lines
+            # if parsing fails, no big deal, that's expected for non-data
+            # lines in the file, i.e. the preamble before the e,w,j,p,t lines
             continue
         channel_title = "{}_{}_{}".format(J, parity, T)
         expt_energies.append(float(energy) - thresh_num)
@@ -200,6 +212,7 @@ def get_experimental():
     overall_titles.append("Experiment")
     print("got experimental data")
 
+
 def plot_scheme():
     add_nmax_data(Nmax_list)
     get_experimental()
@@ -210,4 +223,6 @@ def plot_scheme():
         overall_channels,
         overall_titles)
 
-plot_scheme()
+
+if __name__ == "__main__":
+    plot_scheme()

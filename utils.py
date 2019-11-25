@@ -5,6 +5,7 @@ import os
 # directory where we'll store info about resonances
 output_dir = os.path.join(os.path.dirname(__file__), "resonances_Nmax_{}")
 
+
 def abs_path(path):
     """return the absolute path to a file"""
     # first expand ~ for the user
@@ -24,9 +25,9 @@ def is_float(string):
 def index_list(input_list):
     """returns indices for smallest to largest values in input_list,
     no repeat values allowed.
-    
+
     Same idea as list.index() but that gives repeats"""
-    
+
     sorted_index_list = []
     s_input_list = sorted(input_list)
     used = [False for element in input_list]
@@ -44,10 +45,11 @@ def index_list(input_list):
 
     return sorted_index_list
 
+
 def multi_strip(string, list_of_strs):
     """
     Returns the string but stripped of substrings
-    
+
     Same idea as string.strip(), but for many arguments
     """
     for s in list_of_strs:
@@ -82,7 +84,9 @@ def make_nice_title(xmtitle):
 
 
 def make_plot_title(nice_title):
-    """makes a plottable, LaTeX formatted title, for use in matplotlib graphs"""
+    """
+    makes a plottable, LaTeX formatted title, for use in matplotlib graphs
+    """
     hunks = nice_title.split("_")
     J2, parity, T2, _, col = hunks
 
@@ -103,7 +107,7 @@ def make_plot_title(nice_title):
 
 def plot_title_2(title):
     """title is of the form J_parity_T[_column]
-    
+
     (the _column is optional)
     """
     # remove \n in case it exists
