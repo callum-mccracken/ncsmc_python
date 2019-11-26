@@ -147,7 +147,7 @@ def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
     this_nmax_energies = eigenphase_energies + bound_energies
     this_nmax_widths = eigenphase_widths + [0] * len(bound_energies)
     this_nmax_channels = eigenphase_titles + bound_titles
-    this_nmax_title = "${}\\hbar\\omega$".format(Nmax)
+    this_nmax_title = "${}\\hbar\\Omega$".format(Nmax)
 
     overall_energies.append(this_nmax_energies)
     overall_widths.append(this_nmax_widths)

@@ -66,6 +66,10 @@ def plot_levels(energies, widths, channel_titles, main_title,
     # format energies for plotting
     e_titles = ["{}".format(e) for e in energies]
 
+    # plot dotted line at zero energy
+    ax.plot([-5, 15], [0, 0], '--k', linewidth=1,
+            solid_capstyle="butt")
+
     # plot each energy line with a bar around it depending on width
     # also add titles for energy, state label, width
     for i in range(len(energies)):
@@ -75,8 +79,8 @@ def plot_levels(energies, widths, channel_titles, main_title,
                 solid_capstyle="butt")
 
         # figure out if this energy's width will fit on the plot
-        top = energies[i] + widths[i]
-        btm = energies[i] - widths[i]
+        top = energies[i] + widths[i] / 2
+        btm = energies[i] - widths[i] / 2
         itll_fit = top < max_y and btm > min_y
 
         # x value of the middle of this point
