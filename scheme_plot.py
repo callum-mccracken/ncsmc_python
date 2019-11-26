@@ -12,11 +12,11 @@ cmap = plt.get_cmap('viridis')
 dpi = 96
 dpi_high_res = 900
 
-# dimensions of spectrum plots
+# dimensions of spectrum plots, probably don't change these
 x_size = 5
 y_size = 10
 
-# x axis bounds, don't change these unless you're feeling rebellious
+# x axis bounds, definitely don't change these unless you're feeling rebellious
 min_x = 0
 max_x = 10
 
