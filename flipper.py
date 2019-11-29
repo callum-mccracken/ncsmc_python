@@ -11,8 +11,8 @@ Contains a whole bunch of functions which...
   (e.g. -89.8, -89.9, 89.9)
 
 - reorder columns so that they are consistent as one scrolls down
-    - (This was deprecated, but the functions still 
-       exist in case you want to use them later)
+
+- (that was deprecated, but the functions still exist)
 
 - allow you to pick out individual channels
 
