@@ -10,8 +10,8 @@ python resonance_plotter.py -f /path/to/some/file (assumes file is not flipped)
 It will:
 - flip the file (output saved in same directory as original file)
 - detect which channels have resonances (saved in resonances directory)
-- plot all channels with resonances (also saved in "resonances")
-  - you can set it to plot ALL channels if you want, see the variable res_types
+- plot all channels
+
 """
 from os.path import join, exists
 import os

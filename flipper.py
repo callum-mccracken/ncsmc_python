@@ -1,5 +1,5 @@
 """
-#Flipper
+Flipper
 
 Contains a whole bunch of functions which...
 
@@ -21,6 +21,7 @@ This module can be run with
 python flipper.py -f /path/to/some/file (assumes file is not already flipped)
 
 (output is saved in the same spot as the input, with _flipped at the end)
+
 """
 import argparse
 
@@ -32,12 +33,14 @@ filepath = "/path/to/eigenphase_shift.agr"
 
 
 def flip_if_needed(top_nums, btm_nums):
-    """Compare every number in top_nums to every one in btm_nums.
+    """
+    Compare every number in top_nums to every one in btm_nums.
     If the difference is big, flip the number to make it small.
 
     By "flip", I mean add or subtract 180, as needed.
 
     Return the new list of nums, after being flipped if needed
+
     """
     # the threshold of "that difference is not real data, that's flipped"
     # value = arbitrary, but if we set it too high it can be a problem
@@ -58,6 +61,7 @@ def sanitize(filename):
     Returns lists:
     - one for title lines, contains strings
     - one for number lines, each entry is a sub-list of floats
+
     """
     with open(filename, "r+") as read_file:
         lines = read_file.readlines()
@@ -80,31 +84,19 @@ def sanitize(filename):
 
 
 def separate_into_sections(list_of_nums):
-    """returns sections of the file based on line length
+    """
+    Returns sections of the file based on line length
 
     e.g. if your file looks like
-    [
-        [1, 2],
-        [1, 2],
-        [1, 2, 3, 4],
-        [1, 2, 3, 4]
-    ]
+    [[1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4]]
 
     then this will return
 
-    [
-        [
-            [1, 2],
-            [1, 2]
-        ]
-        [
-            [1, 2, 3, 4],
-            [1, 2, 3, 4]
-        ]
-    ]
+    [[[1, 2], [1, 2]], [[1, 2, 3, 4], [1, 2, 3, 4]]]
 
     I do realize some sections might have the same lengths, one after the other
     (especially at the interface between megasections) and that is dealt with.
+
     """
     # list_of_nums is a list of lists of numbers,
     # from the file but not formatted as strings anymore
@@ -138,7 +130,8 @@ def separate_into_sections(list_of_nums):
 
 
 def separate_into_megasections(sections):
-    """maybe calling them megasections was a little dramatic,
+    """
+    Maybe calling them megasections was a little dramatic,
     but megasections are the sections of the input file separated by titles,
     rather than sections, which are separated by changing line length
 
@@ -594,6 +587,7 @@ def flip(read_filename, verbose=True):
 
 
 if __name__ == "__main__":
+    print("main!")
     # all this stuff is here so you can run this with the -f flag
     parser = argparse.ArgumentParser("Flipper")
     parser.add_argument("-f", nargs='?', const=None, help="filepath", type=str)

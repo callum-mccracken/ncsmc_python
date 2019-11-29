@@ -185,4 +185,5 @@ def adjust_energy(n_points):
         # run batch script
         os.system("qsub "+batch)
 
-adjust_energy(n_adjustments)
+if __name__ == "__main__":
+    adjust_energy(n_adjustments)
