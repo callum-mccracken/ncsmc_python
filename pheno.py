@@ -1,7 +1,7 @@
 """
-module to do phenomenological adjustment of data
+Module to do phenomenological adjustment of data
 
-i.e. it'll mess with your coupling kernel files
+i.e. it'll mess with your coupling kernel files and re-run ncsmc.
 """
 from os.path import relpath, dirname, join, realpath, split, exists
 import os
@@ -37,6 +37,7 @@ exe_file = "../ncsm_rgm_Am3_3_plus_Am2_1_1_rmatrix_ortg_omp_mpi.exe"
 
 
 def get_current_state_energy(coupling_file):
+    """Find the current energy of the state of interest."""
     cpl_file = join(this_dir, coupling_file)
     # get current value of state energy
     with open(cpl_file, "r+") as kernels:
@@ -78,6 +79,7 @@ def get_current_state_energy(coupling_file):
     return min_E, line_num
 
 def get_ground_state_energy(dot_out_file):
+    """Get ground state energy from ncsmc output."""
     dot_out_file = join(this_dir, dot_out_file)
     with open(dot_out_file, "r+") as out_file:
         lines = out_file.readlines()
@@ -93,7 +95,7 @@ def get_ground_state_energy(dot_out_file):
             return float(E)
 
 def make_run_dir(new_energy, old_energy, line_num):
-    """put all necessary files in a run directory"""
+    """Put all files needed to run ncsmc in a directory"""
     # first off make the dir
     e_str = "{:05f}".format(new_energy).replace(".", "_").replace("-", "neg_")
     run_dir = realpath(join(this_dir, "E_"+e_str))
@@ -164,6 +166,7 @@ def make_run_dir(new_energy, old_energy, line_num):
     return new_batch
 
 def adjust_energy(n_points):
+    """Make run directories for a bunch of different energies"""
     # get value of lowest energy of the state we want
     # (as well as its line number)
     current_energy, line_num = get_current_state_energy(coupling_kernels_file)

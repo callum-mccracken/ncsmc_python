@@ -43,7 +43,9 @@ def linewidth_from_data_units(linewidth, axis, reference='y'):
 def plot_levels(energies, widths, channel_titles, main_title,
                 min_y, max_y, ax=None, y_label="Energy ($MeV$)",
                 colors=None):
-    """makes a plot of a single level scheme"""
+    """
+    Makes a plot of a single level scheme.
+    """
     # set up plot
     if ax is None:
         _, ax = plt.subplots(figsize=(x_size, y_size), dpi=dpi)
@@ -114,7 +116,9 @@ def plot_levels(energies, widths, channel_titles, main_title,
 
 def plot_multi_levels(energies_list, widths_list, channel_title_list,
                       main_title_list):
-    """make plots of many different spectra on one figure"""
+    """
+    Make plots of many different schemes, stiched together into one figure.
+    """
     n_spectra = len(energies_list)
     n_lines = max([len(e) for e in energies_list])
 

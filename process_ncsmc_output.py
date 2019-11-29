@@ -1,7 +1,5 @@
 """
-#Process NCSMC Output
-
-a module to consolidate all functions in ncsmc_python, so you can just
+A module to consolidate all functions in ncsmc_python, so you can just
 feed it the NCSMC output, and it gives you a bunch of useful stuff:
 
 - plots of all resonances
@@ -45,6 +43,10 @@ overall_titles = []
 
 
 def select_interesting_channels(Nmax):
+    """
+    Get interesting channels (i.e. those channels which contain resonances)
+    by using human input in a file.
+    """
     interesting_file = "resonances_Nmax_{}/interesting.txt".format(Nmax)
     exists = os.path.exists(interesting_file)
     blank = True if not exists else os.path.getsize(interesting_file) == 0
@@ -102,7 +104,9 @@ def select_interesting_channels(Nmax):
 
 def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
                    bound_energies, bound_titles):
-    """use eigenphase file to find details about resonances"""
+    """
+    Use eigenphase file to find details about resonances (widths, energies)
+    """
 
     # plot interesting resonances / spaghetti plot, in high-res
     eigenphase_csvs = resonance_plotter.plot(
@@ -150,6 +154,9 @@ def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
 
 
 def add_nmax_data(Nmax_list):
+    """
+    Add data to be plotted on the level scheme for each Nmax in Nmax_list
+    """
     for i, Nmax in enumerate(Nmax_list):
         print("working on Nmax =", Nmax)
         # get ncsmc, .out output files
@@ -174,7 +181,9 @@ def add_nmax_data(Nmax_list):
 
 
 def get_experimental():
-    # grab tunl data from file
+    """
+    Grab experimental data from a file which must be prepared in advance.
+    """
     with open(experiment, "r+") as expt_file:
         expt_lines = expt_file.readlines()
 
@@ -208,6 +217,9 @@ def get_experimental():
 
 
 def plot_scheme():
+    """
+    Plot a level scheme!
+    """
     add_nmax_data(Nmax_list)
     get_experimental()
 
@@ -219,12 +231,12 @@ def plot_scheme():
 
 
 if __name__ == "__main__":
-
+    # first ensure files exist
     files = phase_shift_list+eigenphase_shift_list+ncsmc_dot_out_list+[experiment]
     for f in files:
         if not os.path.exists(f):
             raise OSError("file {} does not exist!".format(f))
         if not os.path.getsize(f) > 0:
             raise ValueError("file "+f+" is empty!")
-
+    # then plot the level scheme
     plot_scheme()

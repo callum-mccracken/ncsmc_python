@@ -1,13 +1,11 @@
 """
-#Output Simplifier
-
 Takes ncsmc output (.out) files, grabs info about bound states,
 and outputs a ".out_simplified" file in the same spot as the original.
 
 Can be run by editing the filename parameter in this file,
 or just running the file with the command:
 
-python output_simplifier.py -f [filename]
+``python output_simplifier.py -f [filename]``
 
 """
 import argparse
@@ -65,9 +63,7 @@ def get_j_parity(line):
 
 def t_line(line):
     """
-    checks if line is of the form
-
-    2*T= 0
+    Checks if line is of the form ``2*T= 0``
     """
     regex = r"[ ]*2\*T=[ ]*[-]?[0-9]*\n"
     return bool(re.match(regex, line))
@@ -82,9 +78,9 @@ def get_t(line):
 
 def bound_state_line(line):
     """
-    checks if line is of the form
+    Checks if line is of the form
 
-    Bound state found at E_b=[energy] [unit]
+    ``Bound state found at E_b=[energy] [unit]``
     """
     return "Bound state found at E_b=" in line
 
@@ -98,12 +94,18 @@ def get_e(line):
 
 
 def groud_e_line(line):
+    """Checks if line contains ``Ground-state E=``"""
     return "Ground-state E=" in line
 
 
 def get_ground_e(line):
-    """line looks like:
-    Ground-state E= -68.4838  T_rel=   9.3033  [...]"""
+    """
+    The line looks like:
+
+    ``Ground-state E= -68.4838  T_rel=   9.3033  [...]``
+
+    Get E.
+    """
     # remove initial bit
     line = line.replace("Ground-state E=", "")
     # then after that, it'll be the first "word", strip whitespace too
@@ -112,6 +114,7 @@ def get_ground_e(line):
 
 
 def thresh_e_line(line):
+    """Checks if line contains ``Threshold E=``"""
     return "Threshold E=" in line
 
 

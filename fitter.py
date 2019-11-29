@@ -1,6 +1,4 @@
 """
-Fitter
-
 Module for fitting cubics to resonances interactively.
 
 Creates GUI with interactive sliders to play with, to set left/right limits.
@@ -247,10 +245,12 @@ def find_resonance(csv_filename):
 
 def save_info(csv_path, titles, widths, energies):
     """
-    save titles, widths, and energies to a csv file.
+    Save titles, widths, and energies to a csv file.
 
     titles = list of srings
+
     energies, widths = lists of floats
+
     csv_path = string
     """
     file_string = "2J_parity_2T_column,width,energy\n"

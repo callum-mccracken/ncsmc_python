@@ -1,6 +1,4 @@
 """
-Flipper
-
 Contains a whole bunch of functions which...
 
 - read ncsmc phase shift output files
@@ -18,7 +16,8 @@ Contains a whole bunch of functions which...
 
 This module can be run with
 
-python flipper.py -f /path/to/some/file (assumes file is not already flipped)
+``python flipper.py -f /path/to/some/file``
+(assumes file is not already flipped)
 
 (output is saved in the same spot as the input, with _flipped at the end)
 
@@ -295,8 +294,11 @@ def get_column_map(top_line, bottom_line):
     but the ideas is that you just say you just say
 
     a = top line
+
     b = bottom line
+
     map = get_column_map(a, b)
+
     b = [b[map[i]] for i in range(len(b))]
 
     and then b has the same column order as a.
@@ -384,7 +386,7 @@ def get_add_map(top_line, bottom_line):
 
 def apply_add_mapping(line, mapping):
     """
-    apply map generated in get_add_map() to a line
+    Apply map generated in get_add_map() to a line
     """
     new_line = [line[i] + mapping[i] for i in range(len(line))]
     return new_line

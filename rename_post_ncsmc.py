@@ -1,13 +1,11 @@
 """
-#Rename Post NCSMC
-
 Module for renaming files created by NCSMC.
 
 You can add a line to the end of your NCSMC batch script to call this, e.g.
 
-python /path/to/rename_post_ncsmc.py --projectile=$projectile
+``python /path/to/rename_post_ncsmc.py --projectile=$projectile
 --target=$target --potential=$potential --freq=$freq --Nmax=$Nmax
---affix=$affix
+--affix=$affix``
 """
 
 import os
@@ -26,15 +24,16 @@ affix = ''
 def rename_all(projectile=projectile, target=target, potential=potential,
                freq=freq, Nmax=Nmax, affix=affix):
     """
-    given a bunch of nucleus details, rename files after running ncsmc
+    Given a bunch of nucleus details, rename files after running ncsmc
 
     Example parameters:
-    projectile = 'n'
-    target = 'Li8'
-    potential = 'n3lo-NN3Nlnl-srg2.0'
-    freq = '20'
-    Nmax = '4'
-    affix = ''
+    ::
+        projectile = 'n'
+        target = 'Li8'
+        potential = 'n3lo-NN3Nlnl-srg2.0'
+        freq = '20'
+        Nmax = '4'
+        affix = ''
     """
 
     # stuff to be written into your filenames e.g. x.y --> x_details.y

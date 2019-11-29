@@ -1,11 +1,13 @@
 """
 Contains a function for making plots related to ncsmc output.
 
-Makes both matplotlib (png and svg) and xmgrace plots
+Makes both matplotlib (png and svg) and xmgrace plots.
 
 Can be run with
 
-python resonance_plotter.py -f /path/to/some/file (assumes file is not flipped)
+``python resonance_plotter.py -f /path/to/some/file``
+
+(assumes file is not flipped)
 
 It will:
 - flip the file (output saved in same directory as original file)
