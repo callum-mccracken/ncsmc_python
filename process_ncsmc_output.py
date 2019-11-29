@@ -37,12 +37,6 @@ ncsmc_dot_out_list = [os.path.join(file_dir, f) for f in [
 ]
 experiment = os.path.join(file_dir, "experiment_Li9.txt")
 
-files = phase_shift_list+eigenphase_shift_list+ncsmc_dot_out_list+[experiment]
-for f in files:
-    if not os.path.exists(f):
-        raise OSError("file {} does not exist!".format(f))
-    if not os.path.getsize(f) > 0:
-        raise ValueError("file "+f+" is empty!")
 
 overall_energies = []
 overall_widths = []
@@ -225,4 +219,12 @@ def plot_scheme():
 
 
 if __name__ == "__main__":
+
+    files = phase_shift_list+eigenphase_shift_list+ncsmc_dot_out_list+[experiment]
+    for f in files:
+        if not os.path.exists(f):
+            raise OSError("file {} does not exist!".format(f))
+        if not os.path.getsize(f) > 0:
+            raise ValueError("file "+f+" is empty!")
+
     plot_scheme()
