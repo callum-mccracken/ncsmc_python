@@ -11,8 +11,8 @@ Contains a whole bunch of functions which...
   (e.g. -89.8, -89.9, 89.9)
 
 - reorder columns so that they are consistent as one scrolls down
-  - (This was deprecated, but the functions still
-     exist in case you want to use them later)
+    - (This was deprecated, but the functions still 
+       exist in case you want to use them later)
 
 - allow you to pick out individual channels
 
@@ -136,33 +136,14 @@ def separate_into_megasections(sections):
     rather than sections, which are separated by changing line length
 
     e.g. the input looks like:
-    [
-        [
-            [1, 2],
-            [1, 2]
-        ],
-        [
-            [1, 3, 4, 6]
-        ],
-        # there must have been a title here since the next line is smaller
-        [
-            [1, 2]
-        ]
-    ]
+    [[[1, 2], [1, 2]], [[1, 3, 4, 6]],[[1, 2]]]
     --> the megasections are:
 
-    [
-        [
-            [1, 2],
-            [1, 2],
-            [1, 3, 4, 6]
-        ],
-        [
-            [1, 2]
-        ]
-    ]
+    [[[1, 2],[1, 2],[1, 3, 4, 6]],[[1, 2]]]
+
     When combining sections, also make sure that energy is monotonic
     throughout a megasection!
+
     """
     # make mega_sections (combine sections of increasing size)
     mega_sections = []
@@ -304,11 +285,7 @@ def get_column_map(top_line, bottom_line):
     """
     get a dict of the form
 
-    map ={
-        0: index0,
-        1: index1,
-        ...
-    }
+    map ={0: index0, 1: index1, ...}
 
     so if you're wondering what column in the top line corresponds
     to which one in the bottom line, you can use this mapping.
@@ -406,7 +383,9 @@ def get_add_map(top_line, bottom_line):
 
 
 def apply_add_mapping(line, mapping):
-    """apply map generated in get_add_map() to a line"""
+    """
+    apply map generated in get_add_map() to a line
+    """
     new_line = [line[i] + mapping[i] for i in range(len(line))]
     return new_line
 
@@ -519,10 +498,12 @@ def flip_all_sections(sections):
 
 
 def start_from_zero(sections):
-    """Ensure that all channels start "from zero",
+    """
+    Ensure that all channels start "from zero",
     or rather that they don't start at like 180 or -180 or something.
 
-    Make them start from, say, 0.1, not 180.1"""
+    Make them start from, say, 0.1, not 180.1
+    """
 
     # get megasections
     mega_sections = separate_into_megasections(sections)
@@ -562,8 +543,10 @@ def start_from_zero(sections):
 
 
 def flip(read_filename, verbose=True):
-    """Performs flipping operation from start to finish,
-     returns the filename of the flipped file"""
+    """
+    Performs flipping operation from start to finish,
+    returns the filename of the flipped file
+    """
     if verbose:
         print("Flipping...\r", end="")
     read_filename = utils.abs_path(read_filename)
@@ -587,7 +570,6 @@ def flip(read_filename, verbose=True):
 
 
 if __name__ == "__main__":
-    print("main!")
     # all this stuff is here so you can run this with the -f flag
     parser = argparse.ArgumentParser("Flipper")
     parser.add_argument("-f", nargs='?', const=None, help="filepath", type=str)

@@ -1,5 +1,5 @@
 """
-#Fitter
+Fitter
 
 Module for fitting cubics to resonances interactively.
 
@@ -17,7 +17,8 @@ res_energy = 0
 
 
 def read_csv(filename):
-    """Gives the x and y values contained in a 2-column csv file
+    """
+    Gives the x and y values contained in a 2-column csv file
 
     filename: string, path to a csv file with 2 columns (for x and y values)
 
@@ -36,7 +37,8 @@ def read_csv(filename):
 
 
 def fit_cubic(x, y):
-    """x, y are 1D arrays of floats.
+    """
+    x, y are 1D arrays of floats.
 
     Returns cubic, a, b, c, d,
     where cubic is the callable best-fit function y = cubic(x),
@@ -213,11 +215,11 @@ def find_resonance(csv_filename):
 
     Requires a csv file with a name of the form
 
-    .../phase_1_-_3_column_4_Nmax_4.csv
+    ``path/to/file/phase_1_-_3_column_4_Nmax_4.csv``
 
     or more generally,
 
-    .../[word]_[2J]_[parity]_[2T]_column_[col]_Nmax_[Nmax].csv
+    ``path/to/file/[word]_[2J]_[parity]_[2T]_column_[col]_Nmax_[Nmax].csv``
     """
     # get the important stuff out of filename
     filename = os.path.split(csv_filename)[-1]
@@ -244,7 +246,8 @@ def find_resonance(csv_filename):
 
 
 def save_info(csv_path, titles, widths, energies):
-    """save titles, widths, and energies to a csv file.
+    """
+    save titles, widths, and energies to a csv file.
 
     titles = list of srings
     energies, widths = lists of floats
