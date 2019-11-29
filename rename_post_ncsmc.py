@@ -27,6 +27,7 @@ def rename_all(projectile=projectile, target=target, potential=potential,
     Given a bunch of nucleus details, rename files after running ncsmc
 
     Example parameters:
+
     ::
         projectile = 'n'
         target = 'Li8'
@@ -34,6 +35,7 @@ def rename_all(projectile=projectile, target=target, potential=potential,
         freq = '20'
         Nmax = '4'
         affix = ''
+    
     """
 
     # stuff to be written into your filenames e.g. x.y --> x_details.y
