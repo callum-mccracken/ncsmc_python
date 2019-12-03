@@ -22,18 +22,44 @@ Nmax_list = [4, 6]
 # files in the same order as Nmax_list:
 file_dir = ""
 phase_shift_list = [os.path.join(file_dir, f) for f in [
-    "Nmax4/phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4.agr_edited",
-    "Nmax6/phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr_edited"]
+    "../_Nmax4_ncsmc_output/phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4.agr_edited",
+    "../_Nmax6_ncsmc_output/phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr_edited"]
 ]
 eigenphase_shift_list = [os.path.join(file_dir, f) for f in [
-    "Nmax4/eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4.agr_edited",
-    "Nmax6/eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr_edited"]
+    "../_Nmax4_ncsmc_output/eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4.agr_edited",
+    "../_Nmax6_ncsmc_output/eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr_edited"]
 ]
 ncsmc_dot_out_list = [os.path.join(file_dir, f) for f in [
-    "Nmax4/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4",
-    "Nmax6/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6"]
+    "../_Nmax4_ncsmc_output/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4",
+    "../_Nmax6_ncsmc_output/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6"]
 ]
-experiment = os.path.join(file_dir, "experiment_Li9.txt")
+experiment = os.path.join(file_dir, "..", "experiment_Li9.txt")
+
+"""
+the experiment.txt file should contain look something like this:
+
+[start of file]
+Data is from the TUNL images and widths are eyeballed
+(http://www.tunl.duke.edu/nucldata/figures/09figs/09_03_2004.gif)
+
+States are given in the form
+"Energy Width J parity T" but with commas.
+Don't want to mess up the parsing by using commas elsewhere!)
+
+Li9
+THRESH 4.0639
+0,0,1.5,-,1.5
+2.691,0,0.5,-,?
+4.296,0.2,2.5,-,?
+5.38,0.4,?,?,?
+6.43,0,?,?,?
+[end of file]
+
+The stuff at the top of the file isn't necessary, just helpful for a reader.
+The program just looks for the THRESH line, and all lines with commas.
+Use question marks for values that are not known experimentally.
+"""
+
 
 
 overall_energies = []
@@ -89,7 +115,7 @@ def select_interesting_channels(Nmax):
         """
         print(help_str)
         open(interesting_file, "a+").close()
-        input("Hit enter once you've had enough time to enter the right",
+        input("Hit enter once you've had enough time to enter the right" + \
               "lines. Don't forget to SAVE the file!")
 
     with open(interesting_file, "r+") as ch_file:
