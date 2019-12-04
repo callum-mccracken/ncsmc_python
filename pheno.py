@@ -2,6 +2,10 @@
 Module to do phenomenological adjustment of data
 
 i.e. it'll mess with your coupling kernel files and re-run ncsmc.
+
+Warning:
+    This module is under construction.
+
 """
 from os.path import relpath, dirname, join, realpath, split, exists
 import os

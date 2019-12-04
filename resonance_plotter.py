@@ -26,28 +26,36 @@ import utils
 import flipper
 from resonance_info import get_resonance_info
 
-# File path (relative paths are okay)
 filepath = "/path/to/phase_shift.agr_flipped"
+"""File path (relative paths are okay)"""
 
-# value of Nmax, for file naming purposes
 Nmax = 4
+"""value of Nmax, for file naming purposes"""
 
-# Has the file already been "flipped"?
 flipped = True
+"""Has the file already been "flipped"?"""
 
-# Which channels should be added to the multi channel plot?
-# format: 2J,parity,2T,column_number,resonance_type
-# e.g.: "2,+,4,1,strong"
-# blank lines are okay, but no extra spacing please!
-# (just paste into the space between the pair of triple quotes)
 channels_to_plot = """
 
 """
+"""
+channels_to_plot: which channels should be added to the multi channel plot?
 
-# Controls what bounds to use for energy axis,
-# e.g. if you have 0-10 but only want 0-5, set this to (0, 5)
-# If you don't want bounds set this to (-inf, inf)
+format:
+    2J,parity,2T,column_number,resonance_type, e.g.: "2,+,4,1,strong"
+blank spots:
+    blank lines are okay, but no extra spacing please!
+    Just paste into the space between the pair of triple quotes above
+
+"""
+
 energy_bounds = (-inf, inf)
+"""
+energy_bounds: the bounds to use for the energy (x) axis,
+- e.g. if you have 0-10 but only want 0-5, set this to (0, 5)
+- If you don't want bounds set this to (-inf, inf)
+
+"""
 
 # types of resonances to plot. Possible values: "strong", "possible", "none"
 # res_types = ["strong"]  # if you just want "strong" resonances
@@ -63,6 +71,27 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
     Makes a whole bunch of plots.
     - one for each of the user-specified channels
     - one with all channels on the same plot
+
+    filename:
+        string, an eigenphase_shift / phase_shift file path
+
+    flipped:
+        boolean, has this file been put throught flipper.py?
+
+    e_bounds:
+        tuple, (left, right) bounds of the energy axis
+
+    res_types:
+        string or list. what types of resonances should be plotted?
+
+    channels:
+        big string, one channel per line, of channels to be plotted
+
+    Nmax:
+        float, for giving the plot a title
+
+    dpi:
+        resolution of the image
     """
     if res_types == "all":
         res_types = ["strong", "possible", "none"]
@@ -197,7 +226,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
             csv_paths.append(csv_path)
 
     # make main matplotlib plot
-    print("Scopping out a bowl of spaghetti...\r", end="")
+    print("Making big spaghetti plot...\r", end="")
     plt.cla()
     plt.clf()
     plt.title("Multi-Channel "+phase_word.title()+" Shifts")
@@ -224,6 +253,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
 
     print("Done plotting! Saved main plot(s) to:")
     print(main_mpl_path)
+    print(main_mpl_path.replace(".png", ".svg"))
     print(main_grdt_path)
 
     # return paths to csv files of channels we plotted

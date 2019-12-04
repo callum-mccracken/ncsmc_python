@@ -1,11 +1,11 @@
 """
 Module for renaming files created by NCSMC.
 
-You can add a line to the end of your NCSMC batch script to call this, e.g.
+You can add a line to the end of your NCSMC batch script to call this, e.g.::
 
-``python /path/to/rename_post_ncsmc.py --projectile=$projectile
---target=$target --potential=$potential --freq=$freq --Nmax=$Nmax
---affix=$affix``
+    python /path/to/rename_post_ncsmc.py --projectile=$projectile
+    --target=$target --potential=$potential --freq=$freq --Nmax=$Nmax
+    --affix=$affix
 """
 
 import os

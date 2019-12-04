@@ -43,16 +43,24 @@ Details:
 # a bunch of tiny functions for parsing data
 def j_parity_line(line):
     """
-    checks if line is of the form
+    Checks if line is of the form::
 
-    2*J=  6    parity=-1
+        2*J=  6    parity=-1
+
+    line:
+        string, a line of a file
     """
     regex = r"[ ]*2\*J=[ ]*[-]?[0-9]*[ ]*parity=[ ]*[-]?[0-9]*\n"
     return bool(re.match(regex, line))
 
 
 def get_j_parity(line):
-    """assuming j_parity_line(line) == True, return J, parity"""
+    """
+    assuming j_parity_line(line) == True, return J, parity
+    
+    line:
+        string, a line of a file
+    """
     # remove everything except necessary info
     just_nums = line.replace("2*J=", "").replace("parity=", "")
     # get the two "words", i.e. numbers, separated by spaces
@@ -63,14 +71,24 @@ def get_j_parity(line):
 
 def t_line(line):
     """
-    Checks if line is of the form ``2*T= 0``
+    Checks if line is of the form::
+
+        2*T= 0
+
+    line:
+        string, a line of a file
     """
     regex = r"[ ]*2\*T=[ ]*[-]?[0-9]*\n"
     return bool(re.match(regex, line))
 
 
 def get_t(line):
-    """assuming t_line(line) == True, return T"""
+    """
+    assuming t_line(line) == True, return T
+
+    line:
+        string, a line of a file
+    """
     Tx2 = line.replace("2*T=", "")
     T = int(Tx2)/2
     return T
@@ -78,15 +96,23 @@ def get_t(line):
 
 def bound_state_line(line):
     """
-    Checks if line is of the form
+    Checks if line is of the form::
 
-    ``Bound state found at E_b=[energy] [unit]``
+        Bound state found at E_b=[energy] [unit]
+
+    line:
+        string, a line of a file
     """
     return "Bound state found at E_b=" in line
 
 
 def get_e(line):
-    """assuming bound_state_line(line) == True, return E"""
+    """
+    assuming bound_state_line(line) == True, return E
+
+    line:
+        string, a line of a file
+    """
     # remove the initial bit, as well as extra whitespace
     with_units = line.replace("Bound state found at E_b=", "").strip()
     E = with_units.split()[0]  # first "word" = E, second = units
@@ -94,17 +120,25 @@ def get_e(line):
 
 
 def groud_e_line(line):
-    """Checks if line contains ``Ground-state E=``"""
+    """
+    Checks if line contains ``Ground-state E=``
+
+    line:
+        string, a line of a file
+    """
     return "Ground-state E=" in line
 
 
 def get_ground_e(line):
     """
-    The line looks like:
+    The line looks like::
 
-    ``Ground-state E= -68.4838  T_rel=   9.3033  [...]``
+        Ground-state E= -68.4838  T_rel=   9.3033  [...]
 
     Get E.
+
+    line:
+        string, a line of a file
     """
     # remove initial bit
     line = line.replace("Ground-state E=", "")
@@ -114,13 +148,24 @@ def get_ground_e(line):
 
 
 def thresh_e_line(line):
-    """Checks if line contains ``Threshold E=``"""
+    """
+    Checks if line contains ``Threshold E=``
+
+    line:
+        string, a line of a file
+    """
     return "Threshold E=" in line
 
 
 def get_thresh_e(line):
-    """line looks like:
-     Threshold E= -69.0645 MeV"""
+    """
+    line looks like::
+
+        Threshold E= -69.0645 MeV
+
+    line:
+        string, a line of a file
+    """
     # remove the first bit, as well as any extra whitespace
     with_units = line.replace("Threshold E=", "").strip()
     E = with_units.split()[0]  # first "word" = E, second = units
@@ -131,6 +176,21 @@ def simplify(filename, verbose=False):
     """
     Makes a simpler version of ncsmc .out files,
     no more scrolling through 100000 line files!
+
+    Steps:
+
+    1. Look for J, parity, T.
+        - we may have many of these values before seeing a bound state
+        - keep the most recent values before the bound state is mentioned
+
+    2. Get bound state energy
+    3. Get details
+
+    filename:
+        string, path to ncsmc "dot out" file
+
+    verbose:
+        boolean, whether or not to print messages
     """
     filename = utils.abs_path(filename)
     if verbose:
@@ -154,15 +214,6 @@ def simplify(filename, verbose=False):
     # this will hold strings describing states
     states = []
 
-    """
-    Steps:
-
-    1. Look for J, parity, T.
-        - we may have many of these values before seeing a bound state
-        - keep the most recent values before the bound state is mentioned
-    2. Get bound state energy
-    3. Get details
-    """
     # start by searching for a bound state
     step = "looking for bound state"
     for line in lines:

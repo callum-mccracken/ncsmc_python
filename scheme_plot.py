@@ -1,3 +1,19 @@
+"""
+A module with functions for making plots of level schemes.
+
+Either single or multi-scheme plots are possible, and we make output in
+two different formats.
+
+The one with a .png extension is an image file
+(if you haven't heard of png, get outta here).
+
+The one with a .svg extension is also an image file, but saved in
+Scalable Vector Graphics format. It's like .agr, but more commonly used.
+To open / edit that file, may I recommend `Inkscape <https://inkscape.org/>`_?
+
+"""
+
+
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -25,6 +41,15 @@ def linewidth_from_data_units(linewidth, axis, reference='y'):
     """
     Convert a linewidth in data units to linewidth in points.
     (many thanks to stack exchange!)
+
+    linewidth:
+        float, how big you want your line to be, in data units
+
+    axis:
+        axis object on which your graph is made
+
+    reference:
+        string, x or y, which axis data units?
     """
 
     fig = axis.get_figure()
@@ -45,6 +70,33 @@ def plot_levels(energies, widths, channel_titles, main_title,
                 colors=None):
     """
     Makes a plot of a single level scheme.
+
+    energies:
+        list of floats, energies to plot
+
+    widths:
+        list of floats, widths to plot
+
+    channel_titles:
+        list of strings, text to be placed beside levels
+
+    main_title:
+        main plot title, usually something like 2\hbar\Omega
+
+    min_y, max_y:
+        two floats, if a width would go outside these bounds, we cut it off
+
+    ax:
+        matplotlib axis object on which we wish to make this plot.
+        If you're just making a single plot there's no need to worry about this
+        it's just useful if you're putting multiple ones on the same figure.
+
+    y_label:
+        string, label for the y axis
+
+    colors:
+        colors for each level's width, in any matplotlib-compatible format
+
     """
     # set up plot
     if ax is None:
@@ -118,6 +170,18 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
                       main_title_list):
     """
     Make plots of many different schemes, stiched together into one figure.
+
+    energies_list:
+        list of list of floats, energies of each channel on each plot
+
+    widths_list:
+        list of list of floats, widths of each channel on each plot
+
+    channel_title_list:
+        list of list of strings, titles of each channel on each plot
+
+    main_title_list:
+        list of strings, main titles of each plot
     """
     n_spectra = len(energies_list)
     n_lines = max([len(e) for e in energies_list])

@@ -18,9 +18,11 @@ def read_csv(filename):
     """
     Gives the x and y values contained in a 2-column csv file
 
-    filename: string, path to a csv file with 2 columns (for x and y values)
+    filename:
+        string, path to a csv file with 2 columns (for x and y values)
 
-    returns: x, y, arrays of floats
+    returns:
+        x, y, arrays of floats
     """
     with open(filename, 'r') as f:
         reader = csv.reader(f)
@@ -36,11 +38,13 @@ def read_csv(filename):
 
 def fit_cubic(x, y):
     """
-    x, y are 1D arrays of floats.
+    x, y:
+        1D arrays of floats
 
-    Returns cubic, a, b, c, d,
-    where cubic is the callable best-fit function y = cubic(x),
-    and a, b, c, d are the coefficients (floats)
+    returns:
+        cubic, a, b, c, d;
+        where cubic is the callable best-fit function y = cubic(x),
+        and a, b, c, d are the coefficients (floats)
     """
     d, c, b, a = np.polyfit(x, y, 3)
 
@@ -53,11 +57,17 @@ def make_plot(x, y, title):
     """
     This function makes an interactive plot for finding resonances.
 
-    x, y = 1D arrays of floats, title = string
+    x, y:
+        1D arrays of floats
+
+    title:
+        string, title for plot
 
     Requires the ability to open a window and interact with it.
 
-    returns [(width of resonance), (energy of resonance)]
+    returns:
+        list of the form [(width of resonance), (energy of resonance)]
+        for one resonance
 
     (both list elements are floats)
     """
@@ -211,13 +221,12 @@ def find_resonance(csv_filename):
     """
     Finds the energy at which a resonance occurs for given channel.
 
-    Requires a csv file with a name of the form
+    csv_filename:
+        path of the form ``path/to/file/phase_1_-_3_column_4_Nmax_4.csv``
 
-    ``path/to/file/phase_1_-_3_column_4_Nmax_4.csv``
+        or more generally,
 
-    or more generally,
-
-    ``path/to/file/[word]_[2J]_[parity]_[2T]_column_[col]_Nmax_[Nmax].csv``
+        ``path/to/file/[word]_[2J]_[parity]_[2T]_column_[col]_Nmax_[Nmax].csv``
     """
     # get the important stuff out of filename
     filename = os.path.split(csv_filename)[-1]
@@ -247,11 +256,17 @@ def save_info(csv_path, titles, widths, energies):
     """
     Save titles, widths, and energies to a csv file.
 
-    titles = list of srings
+    csv_path:
+        string, where to save the file
 
-    energies, widths = lists of floats
+    titles:
+        list of srings, titles of resonances
 
-    csv_path = string
+    energies:
+        list of floats, energies of resonances
+
+    widths:
+        list of floats, widths of resonances
     """
     file_string = "2J_parity_2T_column,width,energy\n"
     energies = [str(e) for e in energies]

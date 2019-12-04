@@ -15,7 +15,7 @@ import utils
 
 import os
 
-# what resolution to use for final images (spaghetti + scheme plot)
+# what resolution to use for final spaghetti + scheme plot images
 high_res_dpi = 900
 
 Nmax_list = [4, 6]
@@ -34,9 +34,11 @@ ncsmc_dot_out_list = [os.path.join(file_dir, f) for f in [
     "../_Nmax6_ncsmc_output/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6"]
 ]
 experiment = os.path.join(file_dir, "..", "experiment_Li9.txt")
-
 """
-the experiment.txt file should contain look something like this:
+To run this file, you must have an experiment.txt file stored at this location.
+
+
+That file should look something like this:
 
 [start of file]
 Data is from the TUNL images and widths are eyeballed
@@ -60,18 +62,48 @@ The program just looks for the THRESH line, and all lines with commas.
 Use question marks for values that are not known experimentally.
 """
 
-
-
 overall_energies = []
 overall_widths = []
 overall_channels = []
 overall_titles = []
+
+help_str = """
+First, take a look at the phase_PNG files, to figure out which
+channels are interesting
+
+(just look at the graph, if you see a swoop up, it's interesting)
+
+Then, figure out which columns in the eigenphase file those match with.
+(they should have the same J, pi, T, but may have a different column #)
+
+Then, open up resonances_eigenphase_Nmax_[#].csv and copy the lines
+associated with those channels.
+
+When you're done, the file should look
+something like this:
+
+3,+,3,1,strong
+3,+,3,3,strong
+3,-,3,3,strong
+5,-,3,4,none
+5,+,3,4,strong
+
+[lines copied from the eigenphase csv file, one blank line at the end]
+
+"""
+"""
+``help_str`` is the help text displayed to the user when they have to look
+at the phase shift plots and select which channels are important.
+"""
 
 
 def select_interesting_channels(Nmax):
     """
     Get interesting channels (i.e. those channels which contain resonances)
     by using human input in a file.
+
+    Nmax:
+        float
     """
     interesting_file = "resonances_Nmax_{}/interesting.txt".format(Nmax)
     exists = os.path.exists(interesting_file)
@@ -89,30 +121,6 @@ def select_interesting_channels(Nmax):
         # from the resonances.csv file.
 
         print("Enter all interesting channels in", interesting_file)
-        help_str = """
-        First, take a look at the phase_PNG files, to figure out which
-        channels are interesting
-
-        (just look at the graph, if you see a swoop up, it's interesting)
-
-        Then, figure out which columns in the eigenphase file those match with.
-        (they should have the same J, pi, T, but may have a different column #)
-
-        Then, open up resonances_eigenphase_Nmax_[#].csv and copy the lines
-        associated with those channels.
-
-        When you're done, the file should look
-        something like this:
-
-        3,+,3,1,strong
-        3,+,3,3,strong
-        3,-,3,3,strong
-        5,-,3,4,none
-        5,+,3,4,strong
-
-        [lines copied from the eigenphase csv file, one blank line at the end]
-
-        """
         print(help_str)
         open(interesting_file, "a+").close()
         input("Hit enter once you've had enough time to enter the right" + \
@@ -131,7 +139,27 @@ def select_interesting_channels(Nmax):
 def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
                    bound_energies, bound_titles):
     """
-    Use eigenphase file to find details about resonances (widths, energies)
+    Use eigenphase file to add details about resonances (widths, energies, ...)
+    to the overall lists of data to be plotted.
+
+    Nmax:
+        float
+
+    eigenphase_flipped:
+        path to flipped eigenphase file
+
+    channels_str:
+        string, the contents of the csv file with the details
+        of interesting resonances (width, energy, state)
+
+    channel_titles:
+        list of strings, again representing channels but formatted nicely
+
+    bound_energies:
+        list of floats, energies of bound states
+
+    bound_titles:
+        list of strings, titles of bound states
     """
 
     # plot interesting resonances / spaghetti plot, in high-res
@@ -182,6 +210,9 @@ def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
 def add_nmax_data(Nmax_list):
     """
     Add data to be plotted on the level scheme for each Nmax in Nmax_list
+
+    Nmax_list:
+        list of floats
     """
     for i, Nmax in enumerate(Nmax_list):
         print("working on Nmax =", Nmax)
@@ -209,6 +240,8 @@ def add_nmax_data(Nmax_list):
 def get_experimental():
     """
     Grab experimental data from a file which must be prepared in advance.
+
+    The path to the file is saved above as ``experiment``
     """
     with open(experiment, "r+") as expt_file:
         expt_lines = expt_file.readlines()
@@ -244,11 +277,22 @@ def get_experimental():
 
 def plot_scheme():
     """
-    Plot a level scheme!
+    Plot a level scheme! Grab all data and call
+    ``scheme_plot.plot_multi_levels()``
     """
+    # first ensure files exist
+    files = phase_shift_list+eigenphase_shift_list+ncsmc_dot_out_list+[experiment]
+    for f in files:
+        if not os.path.exists(f):
+            raise OSError("file {} does not exist!".format(f))
+        if not os.path.getsize(f) > 0:
+            raise ValueError("file "+f+" is empty!")
+
+    # then get the data we need
     add_nmax_data(Nmax_list)
     get_experimental()
 
+    # then plot the level scheme
     scheme_plot.plot_multi_levels(
         overall_energies,
         overall_widths,
@@ -257,12 +301,4 @@ def plot_scheme():
 
 
 if __name__ == "__main__":
-    # first ensure files exist
-    files = phase_shift_list+eigenphase_shift_list+ncsmc_dot_out_list+[experiment]
-    for f in files:
-        if not os.path.exists(f):
-            raise OSError("file {} does not exist!".format(f))
-        if not os.path.getsize(f) > 0:
-            raise ValueError("file "+f+" is empty!")
-    # then plot the level scheme
     plot_scheme()

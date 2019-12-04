@@ -14,12 +14,15 @@ Contains a whole bunch of functions which...
 
 - allow you to pick out individual channels
 
-This module can be run with
+This module can be run with::
 
-``python flipper.py -f /path/to/some/file``
-(assumes file is not already flipped)
+    python flipper.py
 
-(output is saved in the same spot as the input, with _flipped at the end)
+if you've edited the filepath at the top of this file, or with::
+
+    python flipper.py -f /path/to/some/file
+
+(output is saved in the same spot as the input, with ``_flipped`` at the end)
 
 """
 import argparse
@@ -33,6 +36,12 @@ filepath = "/path/to/eigenphase_shift.agr"
 
 def flip_if_needed(top_nums, btm_nums):
     """
+    top_nums:
+        list of floats, line directly above btm_nums
+
+    btm_nums:
+        list of floats
+
     Compare every number in top_nums to every one in btm_nums.
     If the difference is big, flip the number to make it small.
 
@@ -57,9 +66,12 @@ def sanitize(filename):
     Opens NCSMC output file, reads each line, separates into text lines and
     number lines. Sets NaN values to zero.
 
-    Returns lists:
-    - one for title lines, contains strings
-    - one for number lines, each entry is a sub-list of floats
+    filename:
+        ncsmc eigenphase_shift or phase_shift file path
+
+    returns:
+        - one list of strings, for title lines 
+        - one list of number lines, each entry is a sub-list of floats
 
     """
     with open(filename, "r+") as read_file:
@@ -86,15 +98,33 @@ def separate_into_sections(list_of_nums):
     """
     Returns sections of the file based on line length
 
-    e.g. if your file looks like
-    [[1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4]]
+    e.g. if your list_of_nums looks like::
 
-    then this will return
+        [
+            [1, 2],
+            [1, 2],
+            [1, 2, 3, 4],
+            [1, 2, 3, 4]
+        ]
 
-    [[[1, 2], [1, 2]], [[1, 2, 3, 4], [1, 2, 3, 4]]]
+    then this will return::
+
+        [
+            [
+                [1, 2],
+                [1, 2]
+            ],
+            [
+                [1, 2, 3, 4],
+                [1, 2, 3, 4]
+            ]
+        ]
 
     I do realize some sections might have the same lengths, one after the other
     (especially at the interface between megasections) and that is dealt with.
+
+    list_of_nums:
+        a list of the above input form
 
     """
     # list_of_nums is a list of lists of numbers,
@@ -134,14 +164,39 @@ def separate_into_megasections(sections):
     but megasections are the sections of the input file separated by titles,
     rather than sections, which are separated by changing line length
 
-    e.g. the input looks like:
-    [[[1, 2], [1, 2]], [[1, 3, 4, 6]],[[1, 2]]]
-    --> the megasections are:
+    e.g. if ``sections`` looks like this::
 
-    [[[1, 2],[1, 2],[1, 3, 4, 6]],[[1, 2]]]
+        [
+            [
+                [1, 2],
+                [1, 2]
+            ],
+            [
+                [1, 3, 4, 6]
+            ],
+            [
+                [1, 2]
+            ]
+        ]
+
+    then the megasections are::
+
+        [
+            [
+                [1, 2],
+                [1, 2],
+                [1, 3, 4, 6]
+            ],
+            [
+                [1, 2]
+            ]
+        ]
 
     When combining sections, also make sure that energy is monotonic
     throughout a megasection!
+
+    sections:
+        a list of lists of lists, of the form above
 
     """
     # make mega_sections (combine sections of increasing size)
@@ -175,6 +230,9 @@ def separate_into_channels(filename):
 
     Also returns energies associated with each row. Note that not all
     channels have the same length as the energy list!
+
+    filname:
+        string, the path to a phase_shift / eigenphase_shift file
     """
     text_lines, num_lines = sanitize(filename)
     sections = separate_into_sections(num_lines)
@@ -213,7 +271,12 @@ def separate_into_channels(filename):
 
 
 def do_one_flip(section):
-    """perform the flip operation on one section one time"""
+    """
+    Perform the flip operation on one section one time
+
+    sections:
+        list, one element from the output of ``separate_into_sections``
+    """
     new_section = section
     compare_line = section[0]  # we'll always compare to the line before
     for i, line in enumerate(section):
@@ -226,7 +289,12 @@ def do_one_flip(section):
 
 
 def flip_one_section(section):
-    """perform flip operation on a section until fully finished"""
+    """
+    Perform flip operation on a section until fully finished
+
+    sections:
+        list, one element from the output of ``separate_into_sections``
+    """
     # sections have the same number of columns all the way through
     new_section = []
     while new_section != section:
@@ -235,8 +303,20 @@ def flip_one_section(section):
 
 
 def write_data(sections, text_lines, filename):
-    """write flipped data back into a file,
-    making sure to put the text lines (i.e. titles) back in the right spots"""
+    """
+    Write flipped data back into a file,
+    making sure to put the text_lines (i.e. section titles, ...)
+    back in the right spots.
+
+    sections:
+        list, same format as output by ``separate_into_sections``
+
+    text_lines:
+        lines from the original file which did contained non-number characters
+
+    filename:
+        path to phase_shift / eigenphase_shift file
+    """
     write_filename = filename+'_flipped'
     text_line_counter = 0
     tlc = text_line_counter
@@ -273,7 +353,15 @@ def write_data(sections, text_lines, filename):
 
 
 def dist(a, b):
-    """compares a and b "up to flips", i.e. mod 180"""
+    """
+    Compares a and b "up to flips", i.e. mod 180
+
+    a:
+        float
+
+    b:
+        float
+    """
     a_mod = a % 180
     b_mod = b % 180
     d = abs(a_mod - b_mod)
@@ -282,26 +370,32 @@ def dist(a, b):
 
 def get_column_map(top_line, bottom_line):
     """
-    get a dict of the form
+    get a dict of the form::
 
-    map ={0: index0, 1: index1, ...}
+        map = {0: index0, 1: index1, ...}
 
     so if you're wondering what column in the top line corresponds
     to which one in the bottom line, you can use this mapping.
 
     To apply a column mapping easily, use apply_col_mapping()
 
-    but the ideas is that you just say you just say
+    but the ideas is that you just say you just say::
 
-    a = top line
+        a = top line
 
-    b = bottom line
+        b = bottom line
 
-    map = get_column_map(a, b)
+        map = get_column_map(a, b)
 
-    b = [b[map[i]] for i in range(len(b))]
+        b = [b[map[i]] for i in range(len(b))]
 
     and then b has the same column order as a.
+
+    top_line:
+        list of floats
+    
+    bottom_line:
+        list of floats
     """
     # abbreviate so they're easier to type
     a = top_line
@@ -350,6 +444,12 @@ def get_column_map(top_line, bottom_line):
 def apply_col_mapping(line, mapping):
     """
     Applies a column mapping to a line, mapping defined in get_column_map()
+
+    line:
+        list of floats
+
+    mapping:
+        dictionary {maps_this_index: to_this_index}
     """
     rearranged = []
     for i in range(len(line)):
@@ -365,6 +465,12 @@ def get_add_map(top_line, bottom_line):
     of flipped sections don't have big jumps due to fixing flipping issues.
 
     Same kind of idea as get_column_map()
+
+    top_line:
+        list of floats
+
+    bottom_line:
+        list of floats
     """
     # what to add to each column of bottom_line
     # to get it to match up with top_line "up to flips"
@@ -387,6 +493,12 @@ def get_add_map(top_line, bottom_line):
 def apply_add_mapping(line, mapping):
     """
     Apply map generated in get_add_map() to a line
+
+    line:
+        list of floats
+
+    mapping:
+        dictionary {index: how_much_to_add}
     """
     new_line = [line[i] + mapping[i] for i in range(len(line))]
     return new_line
@@ -396,6 +508,9 @@ def flip_columns(sections):
     """
     Take a list of sections and return those same sections, but with
     the columns re-ordered so they're consistent throughout megasections.
+
+    sections:
+        list, same format as output by ``separate_into_sections()``
     """
     big_flipped_sections = []
     while len(sections) > 1:
@@ -455,6 +570,9 @@ def flip_all_sections(sections):
     """
     Perform flipping operation on each section and make sure that there
     are no discontinuities at section breaks within megasections
+
+    sections:
+        list, same format as output by ``separate_into_sections()``
     """
     # flip each section individially
     sections = [flip_one_section(section) for section in sections]
@@ -505,6 +623,9 @@ def start_from_zero(sections):
     or rather that they don't start at like 180 or -180 or something.
 
     Make them start from, say, 0.1, not 180.1
+
+    sections:
+        list, same format as output by ``separate_into_sections()``
     """
 
     # get megasections
@@ -548,6 +669,12 @@ def flip(read_filename, verbose=True):
     """
     Performs flipping operation from start to finish,
     returns the filename of the flipped file
+
+    read_filename:
+        string, phase_shift / eigenphase_shift ncsmc output file path
+
+    verbose:
+        boolean, whether or not to print messages before/after flipping
     """
     if verbose:
         print("Flipping...\r", end="")

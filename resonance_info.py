@@ -1,13 +1,16 @@
 """
 Contains a function which looks through ncsmc data and figures out which
-channels have a resonance, which ones have a potential resonance,
-and which ones have no resonance. Writes data to a csv file.
+channels likely have a resonance, which ones have a potential resonance,
+and which ones likely have no resonance. Writes data to a csv file.
 
-Can be run with
+The classification is mostly to make it easy to see which channels probably
+have a resonance, but it is not a good way to actually classify channels.
+If you have a better way, feel free to implement it.
 
-``python resonance_info.py -f /path/to/some/file``
+This file can be run with::
 
-(assumes file is not flipped)
+    python resonance_info.py -f /path/to/some/file
+
 """
 import os
 from os.path import join, exists
@@ -26,12 +29,15 @@ def get_resonance_info(filename, Nmax=None, already_flipped=False):
     channel to a .csv file, with information about whether or not there is a
     resonance there. Returns name of said .csv file
 
-    filename: path to phase shift file
+    filename:
+        path to phase shift file
 
-    Nmax: integer, max number of excitations allowed
+    Nmax:
+        integer, max number of excitations allowed
 
-    already_flipped: boolean, whether or not the file has already been
-    "flipped" by flipper.py
+    already_flipped:
+        boolean, whether or not the file has already been
+        "flipped" by flipper.py
      """
     filename = utils.abs_path(filename)
     phase_word = "Eigenphase" if "eigen" in filename else "Phase"

@@ -1,5 +1,5 @@
 """
-Things that are useful but didn't really belong anywhere else
+Things that are useful but didn't really belong anywhere else.
 """
 
 import os
@@ -9,14 +9,19 @@ output_dir = os.path.join(os.path.dirname(__file__), "resonances_Nmax_{}")
 
 
 def abs_path(path):
-    """Return the absolute path to a file"""
+    """Return the absolute path to a file (input: string)"""
     # first expand ~ for the user
     # then get rid of any ../ or ./ items
     return os.path.realpath(os.path.expanduser(path))
 
 
 def is_float(string):
-    """Checks if a string can be cast as a float"""
+    """
+    Checks if a string can be cast as a float, returns boolean
+
+    string:
+        some string that might or might not be castable as a float
+    """
     try:
         _ = float(string)
         return True
@@ -30,6 +35,9 @@ def index_list(input_list):
     no repeat values allowed.
 
     Same idea as ``list.index()``, except that function gives repeats
+
+    input_list:
+        list of sortable values
     """
 
     sorted_index_list = []
@@ -54,7 +62,14 @@ def multi_strip(string, list_of_strs):
     """
     Returns the string but stripped of substrings
 
-    Same idea as ``string.strip()``, but for many arguments
+    Same idea as ``string.strip()``, but for many arguments.
+
+    string:
+        you guessed it, a string!
+
+    list_of_strs:
+        possible substrings to be removed from string
+
     """
     for s in list_of_strs:
         if s == "":  # ignore this case
@@ -67,6 +82,9 @@ def multi_strip(string, list_of_strs):
 def make_nice_title(xmtitle):
     """
     Makes nicer-looking titles than the ones provided in xmgrace files
+
+    xmtitle:
+        string, xmgrace title format
     """
     # we'll want a good title for plotting etc., so remove all gross bits
     nice_title = multi_strip(xmtitle, ["\n", "\\", "S", "N", "@", "legend"])
@@ -92,6 +110,9 @@ def make_nice_title(xmtitle):
 def make_plot_title(nice_title):
     """
     Makes a plottable, LaTeX formatted title, for use in matplotlib graphs
+
+    nice_title:
+        a human-readable, but not very pretty string, like 3_1_3
     """
     hunks = nice_title.split("_")
     J2, parity, T2, _, col = hunks
@@ -115,9 +136,9 @@ def plot_title_2(title):
     """
     Makes another kind of plottable, LaTeX formatted title.
 
-    Title is of the form ``J_parity_T[_column]``.
-
-    (the _column is optional)
+    title:
+        string of the form ``J_parity_T[_column]`` (the _column is optional).
+        E.g. 3_1_3
     """
     # remove \n in case it exists
     title = title.replace("\n", "")
@@ -165,6 +186,12 @@ def xmgrace_title(xmtitle, series_num):
     """
     Takes an xmgrace series title and edits the series number,
     setting it equal to series_num.
+
+    xmtitle:
+        string, xmgrace title format
+
+    series_num:
+        integer, number of series in your xmgrace file
     """
 
     # xmtitle has the general format "@ s[num] [...]"
