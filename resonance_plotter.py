@@ -10,6 +10,7 @@ Can be run with
 (assumes file is not flipped)
 
 It will:
+
 - flip the file (output saved in same directory as original file)
 - detect which channels have resonances (saved in resonances directory)
 - plot all channels
@@ -51,7 +52,8 @@ blank spots:
 
 energy_bounds = (-inf, inf)
 """
-energy_bounds: the bounds to use for the energy (x) axis,
+energy_bounds: the bounds to use for the energy (x) axis
+
 - e.g. if you have 0-10 but only want 0-5, set this to (0, 5)
 - If you don't want bounds set this to (-inf, inf)
 
@@ -69,6 +71,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
          channels="", Nmax=None, dpi=dpi):
     """
     Makes a whole bunch of plots.
+
     - one for each of the user-specified channels
     - one with all channels on the same plot
 

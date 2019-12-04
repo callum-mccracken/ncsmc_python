@@ -94,6 +94,8 @@ something like this:
 """
 ``help_str`` is the help text displayed to the user when they have to look
 at the phase shift plots and select which channels are important.
+
+Note that it looks a whole lot better in the python file than online.
 """
 
 

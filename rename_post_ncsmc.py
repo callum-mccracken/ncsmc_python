@@ -29,6 +29,7 @@ def rename_all(projectile=projectile, target=target, potential=potential,
     Example parameters:
 
     ::
+
         projectile = 'n'
         target = 'Li8'
         potential = 'n3lo-NN3Nlnl-srg2.0'
