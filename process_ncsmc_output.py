@@ -128,7 +128,7 @@ def select_interesting_channels(Nmax):
         print("Enter all interesting channels in", interesting_file)
         print(help_str)
         open(interesting_file, "a+").close()
-        input("Hit enter once you've had enough time to enter the right" +
+        input("Hit enter once you've had enough time to enter the right " +
               "lines. Don't forget to SAVE the file!")
 
     with open(interesting_file, "r+") as ch_file:
