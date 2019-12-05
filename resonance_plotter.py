@@ -229,7 +229,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
             csv_paths.append(csv_path)
 
     # make main matplotlib plot
-    print("Making big spaghetti plot...\r", end="")
+    print("Making a big spaghetti plot...\r", end="")
     plt.cla()
     plt.clf()
     plt.title("Multi-Channel "+phase_word.title()+" Shifts")

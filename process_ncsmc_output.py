@@ -35,7 +35,8 @@ ncsmc_dot_out_list = [os.path.join(file_dir, f) for f in [
 ]
 experiment = os.path.join(file_dir, "..", "experiment_Li9.txt")
 """
-To run this file, you must have an experiment.txt file stored at this location.
+To run process_ncsmc_output.py,
+you must have an experiment.txt file stored at the above location.
 
 
 That file should look something like this:
@@ -46,7 +47,7 @@ Data is from the TUNL images and widths are eyeballed
 
 States are given in the form
 "Energy Width J parity T" but with commas.
-Don't want to mess up the parsing by using commas elsewhere!)
+Don't want to mess up the parsing by using commas elsewhere!
 
 Li9
 THRESH 4.0639
@@ -62,13 +63,15 @@ The program just looks for the THRESH line, and all lines with commas.
 Use question marks for values that are not known experimentally.
 """
 
+# stop editing here unless you want to change program behaviour
+
 overall_energies = []
 overall_widths = []
 overall_channels = []
 overall_titles = []
 
 help_str = """
-First, take a look at the phase_PNG files, to figure out which
+First, take a look at the PNGs_phase files, to figure out which
 channels are interesting
 
 (just look at the graph, if you see a swoop up, it's interesting)
@@ -125,7 +128,7 @@ def select_interesting_channels(Nmax):
         print("Enter all interesting channels in", interesting_file)
         print(help_str)
         open(interesting_file, "a+").close()
-        input("Hit enter once you've had enough time to enter the right" + \
+        input("Hit enter once you've had enough time to enter the right" +
               "lines. Don't forget to SAVE the file!")
 
     with open(interesting_file, "r+") as ch_file:
@@ -283,7 +286,8 @@ def plot_scheme():
     ``scheme_plot.plot_multi_levels()``
     """
     # first ensure files exist
-    files = phase_shift_list+eigenphase_shift_list+ncsmc_dot_out_list+[experiment]
+    files = (phase_shift_list + eigenphase_shift_list +
+             ncsmc_dot_out_list + [experiment])
     for f in files:
         if not os.path.exists(f):
             raise OSError("file {} does not exist!".format(f))
