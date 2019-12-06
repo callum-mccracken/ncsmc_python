@@ -210,9 +210,6 @@ def make_plot(x, y, title):
     plt.cla()
     plt.clf()
 
-    # TODO: for some reason, you still have to hit the x in the corner to close
-    # the graph... Why?
-
     # return useful info once the plot is closed
     return [width, res_energy]
 
