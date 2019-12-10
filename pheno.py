@@ -16,7 +16,7 @@ this_dir = dirname(__file__)  # directory of current file, for use later
 # NOTE: All energies in here are in MeV!
 
 # define a channel to adjust
-J = 1
+J = 1  # NOT 2J
 parity = 1  # 1 or -1
 T = 1
 
