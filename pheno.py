@@ -17,28 +17,34 @@ this_dir = dirname(__file__)  # directory of current file, for use later
 
 # define a channel to adjust
 J = 1
-J2 = J * 2
-parity = -1  # 1 or -1
-T = 0
+parity = 1  # 1 or -1
+T = 1
 
 # bound state or resonance? We could in theory figure this out,
 # depends how big our adjustments will be though...
 
 # data from TUNL
-tunl_E = 10.847  # above ground state energy
+tunl_E = 0.9808  # above ground state energy
 
 # we'll make adjustments from our current energy value to the tunl value
 # how many adjustments do we make?
-n_adjustments = 10
+n_adjustments = 1
 
 # relative paths are okay, relative to the directory containing this file
-batch_file = "../runaem0105.sh"
-coupling_kernels_file = "../C12_B11_coupling_kernels_Nmax06_81314_10n_4n.dat"
-rgm_kernels_file = "../B11_RGM_kernels_Nmax06_81314_4n.dat"
-dot_out_file = "../ncsm_rgm_Am2_1_1.out"
-input_file = "../ncsm_rgm_Am2_1_1.in"
-exe_file = "../ncsm_rgm_Am3_3_plus_Am2_1_1_rmatrix_ortg_omp_mpi.exe"
+ncsmc_output_dir = "../../Li8Li9/ncsmc/Nmax6/"
+batch_file = join(ncsmc_output_dir, "batch_ncsmc_6.sh")
+coupling_kernels_files = [join(ncsmc_output_dir, f) for f in [
+    "NCSMC_kernels.dat_Li9_Li8_NNn3lo3Nlnl-srg2.0_Nmax6_Nmax6.20_2p1p_10m_Jz0_full",
+    "NCSMC_kernels.dat_Li9_Li8_NNn3lo3Nlnl-srg2.0_Nmax7_Nmax6.20_2p1p_10m_Jz0_full"
+]]
+rgm_kernels_file = join(ncsmc_output_dir, "RGM_kernels.dat_nLi8_NNn3lo3Nlnl-srg2.0_Nmax6.20_2p1p_Jz0_full")
+dot_out_file = join(ncsmc_output_dir, "ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6")
+input_file = join(ncsmc_output_dir, "ncsm_rgm_Am2_1_1.in")
+exe_file = join(ncsmc_output_dir, "ncsm_rgm_Am3_3_plus_Am2_1_1_rmatrix_ortg_omp_mpi.exe")
 
+# stop editing here
+
+J2 = J * 2
 
 def get_current_state_energy(coupling_file):
     """Find the current energy of the state of interest."""
@@ -119,15 +125,16 @@ def make_run_dir(new_energy, old_energy, line_num):
     shutil.copyfile(current_rgm, new_rgm)
 
     # copy coupling kernels and adjust the value in the new file
-    current_coupling = realpath(join(this_dir, coupling_kernels_file))
-    new_coupling = join(run_dir, split(coupling_kernels_file)[-1])
-    shutil.copyfile(current_coupling, new_coupling)
-    with open(new_coupling, "r+") as coupling:
-        lines = coupling.readlines()
-    line = lines[line_num]
-    lines[line_num] = line.replace(str(old_energy), str(new_energy))
-    with open(new_coupling, "w+") as coupling:
-        coupling.writelines(lines)
+    for coupling_kernels_file in coupling_kernels_files:
+        current_coupling = realpath(coupling_kernels_file)
+        new_coupling = join(run_dir, split(coupling_kernels_file)[-1])
+        shutil.copyfile(current_coupling, new_coupling)
+        with open(new_coupling, "r+") as coupling:
+            lines = coupling.readlines()
+        line = lines[line_num]
+        lines[line_num] = line.replace(str(old_energy), str(new_energy))
+        with open(new_coupling, "w+") as coupling:
+            coupling.writelines(lines)
     
     # copy and adjust input file so that the lines for 
     # J2min_in, J2_max_in, parity_min_in, parity_max_in
@@ -173,7 +180,8 @@ def adjust_energy(n_points):
     """Make run directories for a bunch of different energies"""
     # get value of lowest energy of the state we want
     # (as well as its line number)
-    current_energy, line_num = get_current_state_energy(coupling_kernels_file)
+    ck_file = coupling_kernels_files[0]
+    current_energy, line_num = get_current_state_energy(ck_file)
 
     # get ground state energy from .out file
     ground_state_E = get_ground_state_energy(dot_out_file)
@@ -182,8 +190,11 @@ def adjust_energy(n_points):
     experiment_energy = tunl_E + ground_state_E
 
     print("we are off by", abs(experiment_energy - current_energy), "MeV")
-
-    test_energies = np.linspace(current_energy, experiment_energy, n_points)
+    if n_adjustments == 1:
+        test_energies = [experiment_energy]
+    else:
+        test_energies = np.linspace(
+            current_energy, experiment_energy, n_points)
 
     for test_energy in test_energies:
         print("running NCSMC for E =", test_energy, "MeV")
