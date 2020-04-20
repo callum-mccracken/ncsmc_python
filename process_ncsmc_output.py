@@ -123,7 +123,7 @@ def select_interesting_channels(Nmax):
     Nmax:
         float
     """
-    interesting_file = "resonances_Nmax_{}/interesting.txt".format(Nmax)
+    interesting_file = os.path.join(utils.output_dir.format(Nmax), "interesting.txt")
     exists = os.path.exists(interesting_file)
     blank = True if not exists else os.path.getsize(interesting_file) == 0
     must_write = (not exists) or blank

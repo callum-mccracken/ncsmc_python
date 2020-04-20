@@ -132,7 +132,7 @@ def groud_e_line(line):
 def get_ground_e(line):
     """
     *edited since ground state energy is not on
-    the line that says "Ground state E="
+    the line that says "Ground-state E="
 
     The line looks like::
 
@@ -220,7 +220,7 @@ def simplify(filename, verbose=False):
     # start by searching for a bound state
     step = "looking for bound state"
     
-    # counter to get 2 lines down from "Ground state E="
+    # counter to get 2 lines down from "Ground-state E="
     gs_counter = 0
     gs_found = False
 
@@ -232,7 +232,7 @@ def simplify(filename, verbose=False):
 
         if gs_found:
             gs_counter += 1  # count until we find gs line
-            if gs_counter == 2:
+            if gs_counter == 3:  # it's 2 lines down, counter's weird
                 ground_E = get_ground_e(line)
                 # then reset the counter
                 gs_found = False
