@@ -168,12 +168,12 @@ def plot_title_2(title):
         J2, parity, T2, _ = hunks
         J = float(J2) / 2
         if J == int(J):
-            J = str(J)
+            J = str(int(J))
         else:
             J = "\\frac{{{}}}{{{}}}".format(J2, 2)
         T = float(T2) / 2
         if T == int(T):
-            T = str(T)
+            T = str(int(T))
         else:
             T = "\\frac{{{}}}{{{}}}".format(T2, 2)
     else:
