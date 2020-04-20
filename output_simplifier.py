@@ -131,9 +131,12 @@ def groud_e_line(line):
 
 def get_ground_e(line):
     """
+    *edited since ground state energy is not on
+    the line that says "Ground state E="
+
     The line looks like::
 
-        Ground-state E= -68.4838  T_rel=   9.3033  [...]
+        Lowest eigenenergy= -68.4838 MeV
 
     Get E.
 
@@ -141,7 +144,7 @@ def get_ground_e(line):
         string, a line of a file
     """
     # remove initial bit
-    line = line.replace("Ground-state E=", "")
+    line = line.replace("Lowest eigenenergy=", "")
     # then after that, it'll be the first "word", strip whitespace too
     E = line.split()[0].strip()
     return float(E)
@@ -216,15 +219,27 @@ def simplify(filename, verbose=False):
 
     # start by searching for a bound state
     step = "looking for bound state"
+    
+    # counter to get 2 lines down from "Ground state E="
+    gs_counter = 0
+    gs_found = False
+
     for line in lines:
-        # if we can get one of the constants for this file, do it
         if groud_e_line(line):
-            ground_E = get_ground_e(line)
+            gs_found = True
         elif thresh_e_line(line):
             thresh_E = get_thresh_e(line)
 
+        if gs_found:
+            gs_counter += 1  # count until we find gs line
+            if gs_counter == 2:
+                ground_E = get_ground_e(line)
+                # then reset the counter
+                gs_found = False
+                gs_counter = 0
+
         # get J, T, parity, E
-        elif step in ["looking for bound state", "done"]:
+        if step in ["looking for bound state", "done"]:
             # safe to assume that if we find a bound state, we'll find
             # J, parity, T first, so no need to make that its own step
             if j_parity_line(line):
@@ -243,6 +258,7 @@ def simplify(filename, verbose=False):
             if "i_p,p_chan,p_st" in line:
                 details = line
                 step = "getting details"
+
         # get all other detail lines
         elif step == "getting details":
             if "i_p,p_chan,p_st" in line:
