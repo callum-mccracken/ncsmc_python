@@ -4,8 +4,15 @@ Things that are useful but didn't really belong anywhere else.
 
 import os
 
-# directory where we'll store info about resonances
-output_dir = os.path.join(os.path.dirname(__file__), "resonances_Nmax_{}")
+# get directory where we'll store info about resonances
+conf_file = os.path.join(os.path.dirname(__file__), "config.txt")
+if os.path.exists(conf_file):
+    with open(conf_file, 'r') as conf:
+        directory = conf.read()
+else:
+    # default to the directory storing python files
+    directory = os.path.dirname(__file__)
+output_dir = os.path.join(directory, "resonances_Nmax_{}")
 
 
 def abs_path(path):

@@ -6,32 +6,25 @@ feed it the NCSMC output, and it gives you a bunch of useful stuff:
 - spaghetti plot with interesting resonances
 - level scheme plot
 """
-import flipper
-import output_simplifier
-import resonance_plotter
-import fitter
-import scheme_plot
-import utils
 
 import os
 
 # what resolution to use for final spaghetti + scheme plot images
 high_res_dpi = 900
 
-Nmax_list = [4, 6]
+Nmax_list = [8]
 # files in the same order as Nmax_list:
-file_dir = ""
+file_dir = "/home/callum/exch/Li9_Li8n_ncsmc/ncsmc/Nmax8"
+put_output_in_file_dir = True  # otherwise defaults to dir with python files
 phase_shift_list = [os.path.join(file_dir, f) for f in [
-    "../_Nmax4_ncsmc_output/phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4.agr_edited",
-    "../_Nmax6_ncsmc_output/phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr_edited"]
+    "phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax8_pheno.agr",
+    ]
 ]
 eigenphase_shift_list = [os.path.join(file_dir, f) for f in [
-    "../_Nmax4_ncsmc_output/eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4.agr_edited",
-    "../_Nmax6_ncsmc_output/eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6.agr_edited"]
+    "eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax8_pheno.agr"]
 ]
 ncsmc_dot_out_list = [os.path.join(file_dir, f) for f in [
-    "../_Nmax4_ncsmc_output/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax4",
-    "../_Nmax6_ncsmc_output/ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax6"]
+    "ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax8_pheno"]
 ]
 experiment = os.path.join(file_dir, "..", "experiment_Li9.txt")
 """
@@ -64,6 +57,26 @@ Use question marks for values that are not known experimentally.
 """
 
 # stop editing here unless you want to change program behaviour
+
+# write config file
+conf_file = os.path.join(os.path.dirname(__file__), "config.txt")
+if put_output_in_file_dir:
+    with open(conf_file, "w") as conf:
+        conf.write(file_dir)
+
+# import a bunch of stuff
+# I know it's not normal to import here but these files need the config file
+# or they'll default to the old storage location
+import flipper
+import output_simplifier
+import resonance_plotter
+import fitter
+import scheme_plot
+import utils
+
+# remove config file
+if os.path.exists(conf_file):
+    os.remove(conf_file)
 
 overall_energies = []
 overall_widths = []
