@@ -58,6 +58,7 @@ def flip_if_needed(top_nums, btm_nums):
         diff = top_nums[i] - btm_nums[i]
         while abs(diff) > thresh:
             btm_nums[i] += np.sign(diff) * 180
+            diff = top_nums[i] - btm_nums[i]
             thresh -= 5
     return btm_nums
 
