@@ -50,14 +50,15 @@ def flip_if_needed(top_nums, btm_nums):
     Return the new list of nums, after being flipped if needed
 
     """
-    # the threshold of "that difference is not real data, that's flipped"
-    # value = arbitrary, but if we set it too high it can be a problem
-    thresh = 90
-
+    
     for i in range(len(top_nums)):  # there might be more new nums than old
+        # the threshold of "that difference is not real data, that's flipped"
+        # start value is arbitrary
+        thresh = 90
         diff = top_nums[i] - btm_nums[i]
-        if abs(diff) > thresh:
+        while abs(diff) > thresh:
             btm_nums[i] += np.sign(diff) * 180
+            thresh -= 5
     return btm_nums
 
 
