@@ -232,9 +232,9 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
     print("Making a big spaghetti plot...\r", end="")
     plt.cla()
     plt.clf()
-    plt.title("Multi-Channel "+phase_word.title()+" Shifts")
+    plt.title(phase_word.title()+" Shift vs. Energy for $N_{max}$ = "+str(Nmax))
     plt.ylabel("Phase (degrees)")
-    plt.ylim(-50, 200)
+    plt.ylim(-5, 150)
     plt.xlim(l_bound, r_bound)
     plt.xlabel("Energy (MeV)")
     for energy, phase, title in to_plot:
@@ -242,7 +242,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
     main_mpl_path = join(
         png_dir,
         phase_word+"_Nmax_"+str(Nmax)+"_"+file_suffix+".png")
-    plt.legend(loc='lower right', shadow=False, fontsize='xx-small')
+    plt.legend(loc='lower right', shadow=False, fontsize='normal')
     plt.savefig(main_mpl_path, dpi=dpi)
     plt.savefig(main_mpl_path.replace(".png", ".svg"))
     plt.close()
