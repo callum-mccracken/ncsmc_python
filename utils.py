@@ -134,8 +134,8 @@ def make_plot_title(nice_title):
         T = str(int(T))
     else:
         T = "\\frac{{{}}}{{{}}}".format(T2, 2)
-    plot_title = "$J={}, \\pi={}, T={}$, column {}".format(
-        J, parity, T, col)
+    plot_title = "${}^{{}}{}$".format(
+        J, parity, T)
     return plot_title
 
 
