@@ -81,7 +81,7 @@ def plot_levels(energies, widths, channel_titles, main_title,
         list of strings, text to be placed beside levels
 
     main_title:
-        main plot title, usually something like 2\hbar\Omega
+        main plot title, usually something like 2\\hbar\\Omega
 
     min_y, max_y:
         two floats, if a width would go outside these bounds, we cut it off
@@ -114,18 +114,24 @@ def plot_levels(energies, widths, channel_titles, main_title,
     ax.set_ylabel(y_label)
     ax.set_xticks([])
 
-    x = np.linspace(min_x, max_x, num=len(energies), endpoint=True).tolist()
+    x = np.linspace(min_x, max_x, num=len(energies)+1, endpoint=True).tolist()
     x_inc = x[1] - x[0]
 
     # format energies for plotting
     e_titles = ["{}".format(e) for e in energies]
 
     # plot dotted line at zero energy
-    ax.plot([-5, 15], [0, 0], '--k', linewidth=1,
+    ax.plot([min_x-5, max_x+5], [0, 0], '--k', linewidth=1,
             solid_capstyle="butt")
 
     # plot each energy line with a bar around it depending on width
     # also add titles for energy, state label, width
+    energies = np.array(energies)
+    widths = np.array(widths)
+    idx = list(reversed(np.argsort(energies)))
+    energies = energies[idx]
+    widths = widths[idx]
+
     for i in range(len(energies)):
         # make an initial skinny plot for each energy value
         ax.plot(x, [energies[i]]*len(x),
@@ -164,7 +170,6 @@ def plot_levels(energies, widths, channel_titles, main_title,
             ax.text(x_mid, energies[i], "{:.2f}".format(float(widths[i])),
                     horizontalalignment='center', size='small', color='cyan',
                     verticalalignment='center')
-
 
 def plot_multi_levels(energies_list, widths_list, channel_title_list,
                       main_title_list):
