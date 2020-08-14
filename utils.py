@@ -97,6 +97,8 @@ def make_nice_title(xmtitle):
     nice_title = multi_strip(xmtitle, ["\n", "\\", "S", "N", "@", "legend"])
     # remove s0, s1, ..., (the first word), that's just used for xmgrace
     nice_title = nice_title[nice_title.index('"'):]
+    # remove extra spaces
+    nice_title = " ".join(nice_title.split())
     # remove quotes and replace spaces with underscores
     nice_title = nice_title.replace('"', "").replace(" ", "_")
     # put underscores between 2J, parity, 2T
