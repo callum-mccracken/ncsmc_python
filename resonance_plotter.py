@@ -242,7 +242,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
     main_mpl_path = join(
         png_dir,
         phase_word+"_Nmax_"+str(Nmax)+"_"+file_suffix+".png")
-    plt.legend(loc='lower right', shadow=False, fontsize='normal')
+    plt.legend(loc='lower right', shadow=False, fontsize='medium')
     plt.savefig(main_mpl_path, dpi=dpi)
     plt.savefig(main_mpl_path.replace(".png", ".svg"))
     plt.close()

@@ -55,7 +55,7 @@ def get_resonance_info(filename, Nmax=None, already_flipped=False):
 
     # channels: dict, key = title, value = list with channel numbers
     channels, _ = flipper.separate_into_channels(new_filename)
-
+    
     # now look in each channel for a resonance
     resonance_info = {}
     for title, phases in channels.items():
