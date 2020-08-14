@@ -694,8 +694,7 @@ def flip(read_filename, verbose=True):
     sections = start_from_zero(sections)
     # write to output file
     new_filename = write_data(sections, text_lines, read_filename)
-    print(sections)
-    
+
     if verbose:
         print("Your data has been flipped! Output:", new_filename)
     return new_filename
