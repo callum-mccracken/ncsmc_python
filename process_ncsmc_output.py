@@ -12,21 +12,20 @@ import os
 # what resolution to use for final spaghetti + scheme plot images
 high_res_dpi = 900
 
-Nmax_list = [8]
+Nmax_list = [7]
 # files in the same order as Nmax_list:
-file_dir = "/home/callum/exch/Li9_Li8n_ncsmc/ncsmc/Nmax8"
+file_dir = "/home/callum/Documents/npsm/input_files/"
 put_output_in_file_dir = True  # otherwise defaults to dir with python files
 phase_shift_list = [os.path.join(file_dir, f) for f in [
-    "phase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax8_pheno.agr",
-    ]
+    "phase_shift_pN12_NNn4lo500_3Nlnl-srg1.8_18_Nmax7_1p2p_15p12m_5p.agr"]
 ]
 eigenphase_shift_list = [os.path.join(file_dir, f) for f in [
-    "eigenphase_shift_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax8_pheno.agr"]
+    "eigenphase_shift_pN12_NNn4lo500_3Nlnl-srg1.8_18_Nmax7_1p2p_15p12m_5p.agr"]
 ]
 ncsmc_dot_out_list = [os.path.join(file_dir, f) for f in [
-    "ncsm_rgm_Am2_1_1.out_nLi8_n3lo-NN3Nlnl-srg2.0_20_Nmax8_pheno"]
+    "ncsm_rgm_Am2_1_1.out_pN12_NNn4lo500_3Nlnl-srg1.8_18_Nmax7_1p2p_15p12m"]
 ]
-experiment = os.path.join(file_dir, "..", "experiment_Li9.txt")
+experiment = os.path.join(file_dir, "", "experiment_O13.txt")
 """
 To run process_ncsmc_output.py,
 you must have an experiment.txt file stored at the above location.
@@ -276,7 +275,9 @@ def get_experimental():
     expt_channels = []
     for line in expt_lines:
         try:
-            energy, width, J, parity, T = line.split(",")
+            energy, width, J, parity, T = line.strip("\n").split(",")
+            if width == "?":
+                width = "0"
         except ValueError:
             # if parsing fails, no big deal, that's expected for non-data
             # lines in the file, i.e. the preamble before the e,w,j,p,t lines
