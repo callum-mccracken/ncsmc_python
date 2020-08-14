@@ -323,9 +323,12 @@ def write_data(sections, text_lines, filename):
     text_line_counter = 0
     tlc = text_line_counter
     with open(write_filename, "w+") as write_file:
-        # start with a title
-        write_file.write(text_lines[tlc])
-        tlc += 1
+        # start with a title if there is a title, ignore &\n lines
+        if text_lines != ['&\n']:
+            write_file.write(text_lines[tlc])
+            tlc += 1
+        else:
+            raise ValueError("Your file "+filename+" seems to be missing j pi t titles")
         for i, section in enumerate(sections):
             for line in section:
                 line_str = ""
@@ -350,7 +353,6 @@ def write_data(sections, text_lines, filename):
                     tlc += 1
         # end with a "&"
         write_file.write(text_lines[tlc])
-        tlc += 1
     return write_filename
 
 
@@ -683,7 +685,6 @@ def flip(read_filename, verbose=True):
     read_filename = utils.abs_path(read_filename)
     # read from original file
     text_lines, number_lines = sanitize(read_filename)
-
     # perform operations to get desired data
     sections = separate_into_sections(number_lines)
     # (apparently the column issue has been solved, no need to flip cols)
@@ -691,10 +692,10 @@ def flip(read_filename, verbose=True):
     sections = flip_all_sections(sections)
     # "start from zero" = make sections start within -180 --> 180
     sections = start_from_zero(sections)
-
     # write to output file
     new_filename = write_data(sections, text_lines, read_filename)
-
+    print(sections)
+    
     if verbose:
         print("Your data has been flipped! Output:", new_filename)
     return new_filename
