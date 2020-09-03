@@ -208,9 +208,19 @@ def xmgrace_title(xmtitle, series_num):
 
     # break up into "words", separated by spaces
     words = xmtitle.split()
+    # something like ['@', 's5', 'legend', '"5\\S+\\N3"', 'column', '1']
 
     # the 1th word should be "s[num]". Set it to "s[series_num]" instead.
     words[1] = "s" + str(series_num)
+
+    # remove right quote from words[3] and put it on words[5]
+    if words[3][-1] == '"':
+        words[3] = words[3][:-1]
+    if words[5][-1] != '"':
+        words[5] = words[5] + '"'
+
+    # column --> col
+    words[4] = 'col'
 
     # rejoin the words
     new_title = " ".join(words)

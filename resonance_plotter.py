@@ -213,10 +213,10 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
             lines = channel_string.splitlines()
             lines[0] = utils.xmgrace_title(lines[0], 0)
             channel_string = "\n".join(lines)
-            grdt_name = join(
+            grace_name = join(
                 grace_dir,
-                phase_word+"_"+nice_title+"_Nmax_"+str(Nmax)+".grdt")
-            with open(grdt_name, "w+") as channel_file:
+                phase_word+"_"+nice_title+"_Nmax_"+str(Nmax)+".agr")
+            with open(grace_name, "w+") as channel_file:
                 channel_file.write(channel_string)
 
             # make csv file for channel too
@@ -248,16 +248,16 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
     plt.close()
 
     # make main xmgrace file
-    main_grdt_path = join(
+    main_grace_path = join(
         grace_dir,
-        phase_word+"_plot_Nmax_"+str(Nmax)+"_"+file_suffix+".grdt")
-    with open(main_grdt_path, "w+") as grace_file:
+        phase_word+"_plot_Nmax_"+str(Nmax)+"_"+file_suffix+".agr")
+    with open(main_grace_path, "w+") as grace_file:
         grace_file.write(main_xmgrace_string)
 
     print("Done plotting! Saved main plot(s) to:")
     print(main_mpl_path)
     print(main_mpl_path.replace(".png", ".svg"))
-    print(main_grdt_path)
+    print(main_grace_path)
 
     # return paths to csv files of channels we plotted
     return csv_paths
