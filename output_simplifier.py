@@ -210,6 +210,7 @@ def simplify(filename, verbose=False):
 
     # parameters for each bound state
     E, J, T, parity, details = default, default, default, default, default
+
     # lists to store E values and state titles, to return at the end
     E_list = []
     state_titles = []
@@ -219,39 +220,71 @@ def simplify(filename, verbose=False):
 
     # start by searching for a bound state
     step = "looking for bound state"
-    
+
+    # All steps:
+    """
+        looking for bound state
+            (scanning through for "Bound state found at E_b=")
+        looking for details
+            (scanning for first i_p,p_chan,p_st values)
+        getting details
+            (getting subsequent lines of i_p,p_chan,p_st values)
+        Then back to looking for bound state until lines run out
+
+        Collects info about each bound state and related details,
+        saving in the state_format format, i.e.
+
+        ======================================================================
+        Bound State Energy = {E} MeV
+        J = {J}
+        T = {T}
+        Parity = {parity}
+
+        Details:
+        {details}
+        ======================================================================
+        
+        (where J, T, parity are the most recent values to appear above
+        the line "Bound state found at E_b= [X] MeV")
+    """
+
     # counter to get 2 lines down from "Ground-state E="
     gs_counter = 0
     gs_found = False
 
     for line in lines:
         if groud_e_line(line):
+            # i.e. if line contains ``Ground-state E=``
             gs_found = True
         elif thresh_e_line(line):
+            # i.e. if line contains ``Threshold E=``
             thresh_E = get_thresh_e(line)
 
         if gs_found:
             gs_counter += 1  # count until we find gs line
             if gs_counter == 3:  # it's 2 lines down, counter's weird
+                # line contains ``Ground-state E=``
                 ground_E = get_ground_e(line)
+                if verbose:
+                    print('ground-state E =', ground_E)
                 # then reset the counter
                 gs_found = False
                 gs_counter = 0
 
-        # get J, T, parity, E
-        if step in ["looking for bound state", "done"]:
+        # get J, T, parity, E for bound states
+        if step == "looking for bound state":
             # safe to assume that if we find a bound state, we'll find
             # J, parity, T first, so no need to make that its own step
-            if j_parity_line(line):
+            if j_parity_line(line):  # of the form 2*J=  6    parity=-1
                 J, parity = get_j_parity(line)
-            elif t_line(line):
+            elif t_line(line):  # of the form 2*T= 0
                 T = get_t(line)
             # then keep looking for a bound state.
             # if we find new J, parity, T values we'll update as needed
 
-            elif bound_state_line(line):
+            elif bound_state_line(line):  # ``Bound state found at E_b=''
                 E = get_e(line)
-                step = "looking for details"
+                step = "looking for details"  # details: i_p,p_chan,p_st
 
         # get the first detail line
         elif step == "looking for details":
@@ -295,7 +328,7 @@ def simplify(filename, verbose=False):
     if verbose:
         E_string = ", ".join([str(E) for E in E_list])
         print("Done simplifying! Found bound states at "+E_string)
-        print("Output: "+filename+"_simplified")
+        print("Simplified output file: "+filename+"_simplified")
     return E_list, state_titles
 
 
