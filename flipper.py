@@ -483,7 +483,7 @@ def get_add_map(top_line, bottom_line):
         bottom_i = bottom_line[i]
         diff = bottom_i - top_i
         # the absolute difference should be no larger than 50, for sure
-        while abs(diff) > 50:
+        if abs(diff) > 50:
             if diff > 0:  # bottom > top so reduce bottom
                 bottom_i -= 180
             else:  # bottom < top so increase bottom
