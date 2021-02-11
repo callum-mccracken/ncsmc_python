@@ -688,7 +688,7 @@ def flip(read_filename, verbose=True):
     # perform operations to get desired data
     sections = separate_into_sections(number_lines)
     # (apparently the column issue has been solved, no need to flip cols)
-    # sections = flip_columns(sections)
+    sections = flip_columns(sections)
     sections = flip_all_sections(sections)
     # "start from zero" = make sections start within -180 --> 180
     sections = start_from_zero(sections)
