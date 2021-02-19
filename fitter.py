@@ -205,10 +205,9 @@ def make_plot(x, y, title):
     fig.canvas.mpl_connect('key_press_event', key_event)
 
     # finally, display the plot
+    print('launching resonance fitter!')
     plt.show()
-    plt.close()
-    plt.cla()
-    plt.clf()
+    plt.close(fig)
 
     # return useful info once the plot is closed
     return [width, res_energy]
@@ -272,3 +271,31 @@ def save_info(csv_path, titles, widths, energies):
         file_string += ",".join([title, width, energy]) + "\n"
     with open(csv_path, "w+") as csv_file:
         csv_file.write(file_string)
+
+if __name__ == "__main__":
+
+    eigenphase_csvs = [
+        "sample_data/eigenphase_3_-_3_column_2_Nmax_8.csv",
+        "sample_data/eigenphase_3_-_5_column_1_Nmax_8.csv",
+    ]
+
+    channel_titles = [
+        "3_-_3_col2",
+        "3_-_5_col1",
+    ]
+
+    eigenphase_info_path = "sample_data/eigenphase_info.csv"
+
+    if os.path.exists(eigenphase_info_path):
+        print(eigenphase_info_path, 'exists, make sure you want to overwrite!')
+
+    eigenphase_widths = []
+    eigenphase_energies = []
+    for csv_file in eigenphase_csvs:
+        width, energy = find_resonance(csv_file)
+        eigenphase_widths.append(width)
+        eigenphase_energies.append(energy)
+
+    # save that information to eigenphase_info_path
+    save_info(eigenphase_info_path, channel_titles,
+              eigenphase_widths, eigenphase_energies)
