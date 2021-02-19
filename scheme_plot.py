@@ -4,11 +4,10 @@ A module with functions for making plots of level schemes.
 Either single or multi-scheme plots are possible, and we make output in
 two different formats.
 
-The one with a .png extension is an image file
-(if you haven't heard of png, get outta here).
+The one with a .png extension is a standard image file.
 
 The one with a .svg extension is also an image file, but saved in
-Scalable Vector Graphics format. It's like .agr, but more commonly used.
+Scalable Vector Graphics format, which means it is more easily editable.
 To open / edit that file, may I recommend `Inkscape <https://inkscape.org/>`_?
 
 """
