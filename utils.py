@@ -124,7 +124,7 @@ def make_plot_title(nice_title):
         a human-readable, but not very pretty string, like 3_1_3
     """
     hunks = nice_title.split("_")
-    J2, parity, T2, _, col = hunks
+    J2, parity, T2, _, _ = hunks
 
     J = float(J2) / 2
     if J == int(J):
@@ -136,8 +136,7 @@ def make_plot_title(nice_title):
         T = str(int(T))
     else:
         T = "\\frac{{{}}}{{{}}}".format(T2, 2)
-    plot_title = "${}^{{}}{}$".format(
-        J, parity, T)
+    plot_title = f"${J}^{{{parity}}}{T}$"
     return plot_title
 
 
@@ -203,12 +202,13 @@ def xmgrace_title(xmtitle, series_num):
         integer, number of series in your xmgrace file
     """
 
-    # xmtitle has the general format "@ s[num] [...]"
+    # xmtitle has the general format "@ s[num] [...]" e.g.
     # and we want it to end up looking like "@ s[series_num] [...]"
+    # e.g. @ s0 legend "9\S-\N3 column 8” ---> @ s2 legend "9\S-\N3 column 8”
 
     # break up into "words", separated by spaces
     words = xmtitle.split()
-    # something like ['@', 's5', 'legend', '"5\\S+\\N3"', 'column', '1']
+    # something like ['@', 's0', 'legend', '"9\S-\N3', 'column', '8"']
 
     # the 1th word should be "s[num]". Set it to "s[series_num]" instead.
     words[1] = "s" + str(series_num)
@@ -219,11 +219,12 @@ def xmgrace_title(xmtitle, series_num):
     if words[5][-1] != '"':
         words[5] = words[5] + '"'
 
-    # column --> col
-    words[4] = 'col'
-
     # rejoin the words
     new_title = " ".join(words)
 
     # ta-da!
     return new_title
+
+if __name__ == "__main__":
+    print(xmgrace_title('@ s0 legend "9\\S-\\N3 column 8', 2))
+    # should be "@ s2 legend "9\S-\N3 column 8"
