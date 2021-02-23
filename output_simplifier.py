@@ -187,6 +187,9 @@ def simplify(filename, verbose=False):
         - keep the most recent values before the bound state is mentioned
 
     2. Get bound state energy
+        - there may be multiple bound states with the same J pi T,
+          so don't stop looping through when we find one
+
     3. Get details
 
     filename:
@@ -226,10 +229,10 @@ def simplify(filename, verbose=False):
         looking for bound state
             (scanning through for "Bound state found at E_b=")
         looking for details
-            (scanning for first i_p,p_chan,p_st values)
+            (scanning for i_p,p_chan,p_st values)
         getting details
             (getting subsequent lines of i_p,p_chan,p_st values)
-        Then back to looking for bound state until lines run out
+        Then back to looking for details or bound state until lines run out
 
         Collects info about each bound state and related details,
         saving in the state_format format, i.e.
@@ -277,31 +280,45 @@ def simplify(filename, verbose=False):
             # J, parity, T first, so no need to make that its own step
             if j_parity_line(line):  # of the form 2*J=  6    parity=-1
                 J, parity = get_j_parity(line)
+                #if verbose:
+                #    print('Updated J, parity:', J, parity)
             elif t_line(line):  # of the form 2*T= 0
                 T = get_t(line)
+                #if verbose:
+                #    print('Updated T:', T)
             # then keep looking for a bound state.
             # if we find new J, parity, T values we'll update as needed
 
             elif bound_state_line(line):  # ``Bound state found at E_b=''
                 E = get_e(line)
+                if verbose:
+                    print('Found bound state:', E)
                 step = "looking for details"  # details: i_p,p_chan,p_st
 
         # get the first detail line
         elif step == "looking for details":
             if "i_p,p_chan,p_st" in line:
                 details = line
+                if verbose:
+                    print('found first detail line')
                 step = "getting details"
 
         # get all other detail lines
         elif step == "getting details":
             if "i_p,p_chan,p_st" in line:
+                #if verbose:
+                #    print('detail line', line)
                 details += line
             else:
+                if verbose:
+                    print('done getting details, appending state')
                 # once we've found the first line after the details,
                 # save state and move on to the next one
                 states.append(state_format.format(
                     E=E, J=J, T=T, parity=parity, details=details))
                 E_list.append(E)
+                #if verbose:
+                #    print('E_list appended', E)
                 state_titles.append("{}_{}_{}".format(J, parity, T))
                 # set some parameters back to default, but not all
                 # since some might be the same as for the next state
@@ -335,8 +352,9 @@ def simplify(filename, verbose=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Output Simplifier")
     parser.add_argument("-f", nargs='?', const=None, help="filepath", type=str)
+    parser.add_argument("-v", nargs='?', const=False, help="verbose", type=bool)
     args = parser.parse_args()
     if args.f is not None:
-        simplify(args.f)
+        simplify(args.f, verbose=args.v)
     else:
         simplify(filename)
