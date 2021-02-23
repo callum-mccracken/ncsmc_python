@@ -68,7 +68,7 @@ dpi = 90
 
 
 def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
-         channels="", Nmax=None, dpi=dpi):
+         channels="", Nmax=None, dpi=dpi, suffix=""):
     """
     Makes a whole bunch of plots.
 
@@ -241,7 +241,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
         plt.plot(energy, phase, label=title)
     main_mpl_path = join(
         png_dir,
-        phase_word+"_Nmax_"+str(Nmax)+"_"+file_suffix+".png")
+        phase_word+"_Nmax_"+str(Nmax)+"_"+file_suffix+suffix+".png")
     plt.legend(loc='lower right', shadow=False, fontsize='medium')
     plt.savefig(main_mpl_path, dpi=dpi)
     plt.savefig(main_mpl_path.replace(".png", ".svg"))
@@ -250,7 +250,7 @@ def plot(filename, flipped=False, e_bounds=(-inf, inf), res_types="all",
     # make main xmgrace file
     main_grace_path = join(
         grace_dir,
-        phase_word+"_plot_Nmax_"+str(Nmax)+"_"+file_suffix+".agr")
+        phase_word+"_plot_Nmax_"+str(Nmax)+"_"+file_suffix+suffix+".agr")
     with open(main_grace_path, "w+") as grace_file:
         grace_file.write(main_xmgrace_string)
 

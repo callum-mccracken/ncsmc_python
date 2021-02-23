@@ -237,10 +237,16 @@ def add_nmax_data(Nmax_list):
         ps = phase_shift_list[i]
         es = eigenphase_shift_list[i]
         dot_out = ncsmc_dot_out_list[i]
+
+        # make unflipped plots, flipped=True prevents flipping
+        resonance_plotter.plot(ps, flipped=True, Nmax=Nmax, suffix='_unflipped')
+        resonance_plotter.plot(es, flipped=True, Nmax=Nmax, suffix='_unflipped')
+
         # flip phase files
         ps = flipper.flip(ps, verbose=False)
         es = flipper.flip(es, verbose=False)
-        # make low-res plots
+
+        # make flipped plots
         resonance_plotter.plot(ps, flipped=True, Nmax=Nmax)
         resonance_plotter.plot(es, flipped=True, Nmax=Nmax)
 
