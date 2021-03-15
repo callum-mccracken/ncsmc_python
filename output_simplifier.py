@@ -304,7 +304,7 @@ def simplify(filename, verbose=False):
                 step = "getting details"
             elif bound_state_line(line):  # ``Bound state found at E_b=''
                 if verbose:
-                    print('found an additonal bound state before details, appending state')
+                    print('found an additonal bound state, appending state')
                 states.append(state_format.format(
                     E=E, J=J, T=T, parity=parity, details="None"))
                 E_list.append(E)
