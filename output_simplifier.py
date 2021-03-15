@@ -59,7 +59,8 @@ def get_j_parity(line):
     assuming j_parity_line(line) == True, return J, parity
     
     line:
-        string, a line of a file
+        string, like  "2*J=  6    parity=-1"
+
     """
     # remove everything except necessary info
     just_nums = line.replace("2*J=", "").replace("parity=", "")
