@@ -130,14 +130,8 @@ def plot_levels(energies, widths, channel_titles, main_title,
     idx = list(reversed(np.argsort(energies)))
     energies = energies[idx]
     widths = widths[idx]
-    tmp = e_titles
-    e_titles = []
-    for i in idx:
-        e_titles.append(tmp[i])
-    tmp = channel_titles
-    channel_titles = []
-    for i in idx:
-        channel_titles.append(tmp[i])
+    e_titles = [x for i, x in sorted(zip(idx, e_titles))]
+    channel_titles = [x for i, x in sorted(zip(idx, channel_titles))]
 
     for i in range(len(energies)):
         # make an initial skinny plot for each energy value
