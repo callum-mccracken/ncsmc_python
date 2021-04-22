@@ -52,18 +52,6 @@ def flip_if_needed(top_nums, btm_nums):
     """
     
     for i in range(len(top_nums)):  # there might be more new nums than old
-        # the threshold of "that difference is not real data, that's flipped"
-        # start value is arbitrary
-        """
-        thresh = 90
-        diff = top_nums[i] - btm_nums[i]
-        while abs(diff) > thresh:
-            print(f'diff: {diff}, thresh: {thresh}')
-            print(f'btm: {btm_nums[i]}, top: {top_nums[i]}')
-            btm_nums[i] += np.sign(diff) * 180
-            diff = top_nums[i] - btm_nums[i]
-            thresh -= 5
-        """
         diff = top_nums[i] - btm_nums[i]
         flipped_diff = top_nums[i] - (btm_nums[i] + np.sign(diff) * 180)
         if abs(diff) > abs(flipped_diff):
