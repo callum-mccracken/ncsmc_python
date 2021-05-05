@@ -52,14 +52,10 @@ def flip_if_needed(top_nums, btm_nums):
     """
     
     for i in range(len(top_nums)):  # there might be more new nums than old
-        # the threshold of "that difference is not real data, that's flipped"
-        # start value is arbitrary
-        thresh = 90
         diff = top_nums[i] - btm_nums[i]
-        while abs(diff) > thresh:
+        flipped_diff = top_nums[i] - (btm_nums[i] + np.sign(diff) * 180)
+        if abs(diff) > abs(flipped_diff):
             btm_nums[i] += np.sign(diff) * 180
-            diff = top_nums[i] - btm_nums[i]
-            thresh -= 5
     return btm_nums
 
 
@@ -688,7 +684,7 @@ def flip(read_filename, verbose=True):
     # perform operations to get desired data
     sections = separate_into_sections(number_lines)
     # (apparently the column issue has been solved, no need to flip cols)
-    # sections = flip_columns(sections)
+    sections = flip_columns(sections)
     sections = flip_all_sections(sections)
     # "start from zero" = make sections start within -180 --> 180
     sections = start_from_zero(sections)
