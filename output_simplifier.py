@@ -303,6 +303,17 @@ def simplify(filename, verbose=False):
                 if verbose:
                     print('found first detail line')
                 step = "getting details"
+            elif bound_state_line(line):  # ``Bound state found at E_b=''
+                if verbose:
+                    print('found an additonal bound state, appending state')
+                states.append(state_format.format(
+                    E=E, J=J, T=T, parity=parity, details="None"))
+                E_list.append(E)
+                state_titles.append("{}_{}_{}".format(J, parity, T))
+                E = get_e(line)
+                if verbose:
+                    print('Found bound state:', E)
+                step = "looking for details"  # details: i_p,p_chan,p_st
 
         # get all other detail lines
         elif step == "getting details":
