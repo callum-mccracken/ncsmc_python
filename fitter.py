@@ -86,6 +86,7 @@ def make_plot(x, y, title):
     increment = x[1] - x[0]  # x should be increasing uniformly
 
     # basic plot setup
+    plt.close('all')
     fig, ax = plt.subplots()
     plt.subplots_adjust(bottom=0.25)
     plt.title("Resonance Finder\n"+title)
@@ -185,7 +186,7 @@ def make_plot(x, y, title):
 
     # function to exit graph when done
     def close_plot(event):
-        plt.close()
+        plt.close('all')
         plt.cla()
         plt.clf()
     done_button.on_clicked(close_plot)
@@ -207,7 +208,6 @@ def make_plot(x, y, title):
     # finally, display the plot
     print('launching resonance fitter!')
     plt.show()
-    plt.close(fig)
 
     # return useful info once the plot is closed
     return [width, res_energy]
