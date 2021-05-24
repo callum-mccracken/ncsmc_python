@@ -14,18 +14,21 @@ high_res_dpi = 900
 
 Nmax_list = [7]
 # files in the same order as Nmax_list:
-file_dir = "/home/callum/Documents/npsm/input_files/"
+file_dir = "/home/callum/Documents/Undergrad Work/npsm/input_files/"
 put_output_in_file_dir = True  # otherwise defaults to dir with python files
 phase_shift_list = [os.path.join(file_dir, f) for f in [
-    "phase_shift_pN12_NNn4lo500_3Nlnl-srg1.8_18_Nmax7_1p2p_15p12m_5p.agr"]
+    "phase_shift.agr"]
 ]
 eigenphase_shift_list = [os.path.join(file_dir, f) for f in [
-    "eigenphase_shift_pN12_NNn4lo500_3Nlnl-srg1.8_18_Nmax7_1p2p_15p12m_5p.agr"]
+    "eigenphase_shift.agr"]
 ]
 ncsmc_dot_out_list = [os.path.join(file_dir, f) for f in [
-    "ncsm_rgm_Am2_1_1.out_pN12_NNn4lo500_3Nlnl-srg1.8_18_Nmax7_1p2p_15p12m"]
+    "ncsm_rgm_Am2_1_1.out"]
 ]
-experiment = os.path.join(file_dir, "", "experiment_O13.txt")
+experiment = os.path.join(file_dir, "", "experiment_C10.txt")
+
+# by default we only make plots of eigenphase, do you want phase plots too?
+make_phase_plots_too = True
 """
 To run process_ncsmc_output.py,
 you must have an experiment.txt file stored at the above location.
@@ -82,7 +85,7 @@ overall_widths = []
 overall_channels = []
 overall_titles = []
 
-help_str = """
+eigen_help_str = """
 First, take a look at the PNGs_phase files, to figure out which
 channels are interesting
 
@@ -107,27 +110,57 @@ something like this:
 
 """
 """
-``help_str`` is the help text displayed to the user when they have to look
-at the phase shift plots and select which channels are important.
+``eigen_help_str`` is the help text displayed to the user when they have to
+look at the phase shift plots and select which channels are important.
 
 Note that it looks a whole lot better in the python file than online.
+"""
+
+phase_help_str = """
+You have opted to plot (non-eigen)phase data too,
+by setting make_phase_plots_too = True.
+
+Take a look at the PNGs_phase files, to figure out which
+channels are interesting
+
+(just look at the graph, if you see a swoop up, it's interesting)
+
+Then, open up resonances_phase_Nmax_[#].csv and copy the lines
+associated with those channels.
+
+When you're done, the file should look
+something like this:
+
+3,+,3,1,strong
+3,+,3,3,strong
+3,-,3,3,strong
+5,-,3,4,none
+5,+,3,4,strong
+
+[lines copied from the phase csv file, one blank line at the end]
+
+"""
+"""
+``phase_help_str`` is just like ``eigen_help_str``, but for phase plots.
 """
 
 
 def select_interesting_channels(Nmax):
     """
     Get interesting channels (i.e. those channels which contain resonances)
-    by using human input in a file.
+    by using human inputs in files.
 
     Nmax:
         float
     """
-    interesting_file = os.path.join(utils.output_dir.format(Nmax), "interesting.txt")
-    exists = os.path.exists(interesting_file)
-    blank = True if not exists else os.path.getsize(interesting_file) == 0
-    must_write = (not exists) or blank
+    eigenphase_interesting_file = os.path.join(
+        utils.output_dir.format(Nmax), "interesting.txt")
+    eigen_exists = os.path.exists(eigenphase_interesting_file)
+    eigen_blank = (True if not eigen_exists
+                   else os.path.getsize(eigenphase_interesting_file) == 0)
+    eigen_must_write = (not eigen_exists) or eigen_blank
 
-    if must_write:
+    if eigen_must_write:
         # here you have to look at the resonance images,
         # and figure out which ones are interesting.
 
@@ -137,27 +170,54 @@ def select_interesting_channels(Nmax):
         # When you find those, write down their corresponding lines
         # from the resonances.csv file.
 
-        print("Enter all interesting channels in", interesting_file)
-        print(help_str)
-        open(interesting_file, "a+").close()
+        print("Enter all interesting channels in", eigenphase_interesting_file)
+        print(eigen_help_str)
+        open(eigenphase_interesting_file, "a+").close()
         input("Hit enter once you've had enough time to enter the right " +
               "lines. Don't forget to SAVE the file!")
 
-    with open(interesting_file, "r+") as ch_file:
-        channels_str = ch_file.read()
+    with open(eigenphase_interesting_file, "r+") as eigen_ch_file:
+        eigen_channels_str = eigen_ch_file.read()
 
     # differently formatted version for use as titles
-    channel_titles = [
-        "_".join(line.split(",")[:-1]) for line in channels_str.splitlines()]
+    eigen_channel_titles = [
+        "_".join(line.split(",")[:-1])
+        for line in eigen_channels_str.splitlines()]
 
-    return channels_str, channel_titles
+    if make_phase_plots_too:
+        phase_interesting_file = os.path.join(
+            utils.output_dir.format(Nmax), "interesting_phase.txt")
+        phase_exists = os.path.exists(phase_interesting_file)
+        phase_blank = (True if not phase_exists
+                       else os.path.getsize(phase_interesting_file) == 0)
+        phase_must_write = (not phase_exists) or phase_blank
+
+        if phase_must_write:
+            print("Enter all interesting channels in", phase_interesting_file)
+            print(phase_help_str)
+            open(phase_interesting_file, "a+").close()
+            input("Hit enter once you've had enough time to enter the right " +
+                  "lines. Don't forget to SAVE the file!")
+
+        with open(phase_interesting_file, "r+") as phase_ch_file:
+            phase_channels_str = phase_ch_file.read()
+
+    else:
+        phase_channels_str = None
+
+    return eigen_channels_str, eigen_channel_titles, phase_channels_str
 
 
-def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
+def add_resonances(Nmax,
+                   eigenphase_flipped, eigen_channels_str,
+                   eigen_channel_titles,
+                   phase_flipped, phase_channels_str,
                    bound_energies, bound_titles):
     """
     Use eigenphase file to add details about resonances (widths, energies, ...)
     to the overall lists of data to be plotted.
+
+    Also takes phase data for plotting purposes if needed
 
     Nmax:
         float
@@ -165,12 +225,16 @@ def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
     eigenphase_flipped:
         path to flipped eigenphase file
 
-    channels_str:
+    eigen_channels_str:
         string, the contents of the csv file with the details
         of interesting resonances (width, energy, state)
 
-    channel_titles:
+    eigen_channel_titles:
         list of strings, again representing channels but formatted nicely
+
+    phase_flipped, phase_channels_str:
+        Same idea as all the eigen ones but for phase.
+        Last one may be None.
 
     bound_energies:
         list of floats, energies of bound states
@@ -182,7 +246,7 @@ def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
     # plot interesting resonances / spaghetti plot, in high-res
     eigenphase_csvs = resonance_plotter.plot(
         eigenphase_flipped, flipped=True, Nmax=Nmax,
-        channels=channels_str, dpi=high_res_dpi)
+        channels=eigen_channels_str, dpi=high_res_dpi)
 
     # save channel info if needed
     eigenphase_info_path = os.path.join(
@@ -197,8 +261,14 @@ def add_resonances(Nmax, eigenphase_flipped, channels_str, channel_titles,
             eigenphase_widths.append(width)
             eigenphase_energies.append(energy)
         # save that information in files for easy access later
-        fitter.save_info(eigenphase_info_path, channel_titles,
+        fitter.save_info(eigenphase_info_path, eigen_channel_titles,
                          eigenphase_widths, eigenphase_energies)
+
+    if make_phase_plots_too:
+        resonance_plotter.plot(
+            phase_flipped, flipped=True, Nmax=Nmax,
+            channels=phase_channels_str, dpi=high_res_dpi)
+        # we don't need widths and energies for phase plots
 
     # grab energy / width of resonances from file
     eigenphase_titles, eigenphase_widths, eigenphase_energies = [], [], []
@@ -239,8 +309,10 @@ def add_nmax_data(Nmax_list):
         dot_out = ncsmc_dot_out_list[i]
 
         # make unflipped plots, flipped=True prevents flipping
-        resonance_plotter.plot(ps, flipped=True, Nmax=Nmax, suffix='_unflipped')
-        resonance_plotter.plot(es, flipped=True, Nmax=Nmax, suffix='_unflipped')
+        resonance_plotter.plot(
+            ps, flipped=True, Nmax=Nmax, suffix='_unflipped')
+        resonance_plotter.plot(
+            es, flipped=True, Nmax=Nmax, suffix='_unflipped')
 
         # flip phase files
         ps = flipper.flip(ps, verbose=False)
@@ -254,9 +326,12 @@ def add_nmax_data(Nmax_list):
         bound_energies, bound_titles = output_simplifier.simplify(dot_out)
 
         # select interesting channels, i.e. those with resonances
-        channels_str, channel_titles = select_interesting_channels(Nmax)
+        # eigen_channels_string, eigen_channels_titles, phase_channels_string
+        # just shortened so the line wasn't weirdly long
+        e_ch_str, e_ch_titles, p_ch_str = select_interesting_channels(Nmax)
         # stick those channels in the overall plot
-        add_resonances(Nmax, es, channels_str, channel_titles,
+        add_resonances(Nmax, es, e_ch_str, e_ch_titles,
+                       ps, p_ch_str,
                        bound_energies, bound_titles)
 
 
