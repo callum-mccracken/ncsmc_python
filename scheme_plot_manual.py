@@ -177,7 +177,7 @@ def plot_levels(energies, widths, channel_titles, main_title,
     idx = list(reversed(np.argsort(energies)))
     energies = energies[idx]
     widths = widths[idx]
-    e_titles = [e_titles[i] for i in idx]
+    #e_titles = [e_titles[i] for i in idx]
     channel_titles = [channel_titles[i] for i in idx]
 
     for i in range(len(energies)):
@@ -266,4 +266,3 @@ def plot_multi_levels(energies_list, widths_list, channel_title_list,
     print("Saved level scheme plot as", fig_path+".png")
 
 plot_multi_levels(energies_list, widths_list, channel_title_list, main_title_list)
-
